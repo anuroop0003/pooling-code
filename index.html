@@ -1,0 +1,319 @@
+Pooling code
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>FuelEU — Pooling of Compliance (Dynamic)</title>
+<style>
+  :root{
+    --bg:#0b132b; --panel:#121f3a; --line:#3a506b; --ink:#eaf1ff;
+    --muted:#a9b3c9; --chip:#0e1b3a; --pill:#1c2541;
+    --pos:#7fffd4; --neg:#ffb3b3; --green:#18d27c; --red:#ff6b6b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,Segoe UI,Roboto,Arial}
+  .wrap{max-width:1120px;margin:20px auto;padding:0 14px 80px}
+  h1{margin:0 0 8px}
+  .muted{color:var(--muted);font-size:13px}
+  table{width:100%;border-collapse:collapse;background:var(--pill);margin-top:12px}
+  th,td{border:1px solid var(--line);padding:10px;text-align:center}
+  th{background:var(--line);color:#fff}
+  input[type="number"], input[type="text"]{
+    width:140px;padding:8px;background:#0e1b3a;color:#fff;border:1px solid var(--line);border-radius:6px
+  }
+  input[type="text"]{text-align:left}
+  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:16px}
+  @media (max-width:980px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
+  .panelTitle{font-weight:800;margin:4px 0 8px}
+  .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}
+  button{padding:9px 14px;border:none;border-radius:8px;cursor:pointer;font-weight:700;background:#5bc0be;color:#0b132b}
+  button.secondary{background:#3a86ff;color:white}
+  button.warn{background:#ff7b7b;color:#240b0b}
+  .kpis{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  .kpi{background:#0e1b3a;border:1px solid var(--line);padding:8px 10px;border-radius:8px}
+  .center{font-weight:900;font-size:22px}
+  .pos{color:var(--pos)} .neg{color:var(--neg)}
+  .chip{display:inline-block;padding:6px 10px;border-radius:999px;background:var(--chip);border:1px solid var(--line);font-weight:800;min-width:56px}
+  .chip.pos{color:var(--green)} .chip.neg{color:var(--red)}
+  .foot{font-size:12px;color:var(--muted);margin-top:10px}
+  .delBtn{padding:6px 10px;border:1px solid #5a2a2a;background:#2a1111;color:#ffb3b3;border-radius:8px;cursor:pointer}
+  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>FuelEU Maritime — Pooling of Compliance</h1>
+  <div class="muted">
+    Enter adjusted compliance balances (positive = surplus; negative = deficit).
+    Chips show <b>transfers</b> (+ received / − given). Large numbers show <b>residuals</b> after pooling.
+  </div>
+
+  <!-- Inputs -->
+  <div class="card">
+    <div class="panelTitle">Before joining pool — Adjusted compliance balance</div>
+
+    <div class="toolbar">
+      <button id="btnAdd">+ Add ship</button>
+      <button class="secondary" id="btnSample">Load sample (A–E)</button>
+      <button class="warn" id="btnClearRows">Clear all ships</button>
+
+      <span class="muted">Alt‑2 amount (Figure 11.4 uses <b>100</b>):</span>
+      <input type="number" id="alt2_amount" value="100" min="0" step="1"/>
+    </div>
+
+    <table id="inputTable">
+      <thead>
+        <tr><th style="width:40%">Ship</th><th style="width:40%">Adjusted compliance balance</th><th style="width:20%"></th></tr>
+      </thead>
+      <tbody id="rowsBody">
+        <!-- rows injected here -->
+      </tbody>
+    </table>
+
+    <div class="kpis">
+      <div class="kpi">Total pool balance: <b id="kTotal">0</b></div>
+      <div class="kpi">Total surplus (≥0): <b id="kSurp">0</b></div>
+      <div class="kpi">Total deficit (&lt;0): <b id="kDef">0</b></div>
+    </div>
+  </div>
+
+  <!-- Result panels -->
+  <div class="grid">
+    <div class="card" id="panelInitial"></div>
+    <div class="card" id="panelAlt1"></div>
+    <div class="card" id="panelAlt2"></div>
+  </div>
+
+  <div class="foot">The sum of residuals (bottom-right of each table) equals the initial total pool balance (conservation).</div>
+</div>
+
+<script>
+/* --------------------------- State & helpers --------------------------- */
+let ships = []; // [{id, name, value}]
+const el = id => document.getElementById(id);
+const fmt = n => Number(n).toLocaleString(undefined,{maximumFractionDigits:2});
+const sgnCls = v => v>=0 ? 'pos' : 'neg';
+const withPlus = v => (v>0?'+':'') + fmt(v);
+const makeId = () => Math.random().toString(36).slice(2,9);
+const nextShipName = () => {
+  const n = ships.length;
+  if (n < 26) return `Ship ${String.fromCharCode(65 + n)}`;
+  return `Ship ${n+1}`;
+};
+
+/* --------------------------- Input table render --------------------------- */
+function renderRows(){
+  const body = el('rowsBody');
+  body.innerHTML = '';
+  ships.forEach(sh => {
+    const tr = document.createElement('tr');
+
+    const tdName = document.createElement('td');
+    const nameIn = document.createElement('input');
+    nameIn.type = 'text'; nameIn.value = sh.name; nameIn.placeholder = 'Ship name';
+    nameIn.addEventListener('input', () => { sh.name = nameIn.value; compute(); });
+    tdName.appendChild(nameIn);
+
+    const tdVal = document.createElement('td');
+    const valIn = document.createElement('input');
+    valIn.type = 'number'; valIn.step = 'any'; valIn.value = sh.value;
+    valIn.addEventListener('input', () => { sh.value = Number(valIn.value || 0); compute(); });
+    tdVal.appendChild(valIn);
+
+    const tdDel = document.createElement('td');
+    const delBtn = document.createElement('button');
+    delBtn.className='delBtn'; delBtn.textContent='Delete';
+    delBtn.addEventListener('click', ()=>{ ships = ships.filter(x=>x.id!==sh.id); renderRows(); compute(); });
+    tdDel.appendChild(delBtn);
+
+    tr.appendChild(tdName); tr.appendChild(tdVal); tr.appendChild(tdDel);
+    body.appendChild(tr);
+  });
+}
+
+/* --------------------------- KPI & read --------------------------- */
+function readShips(){ return ships.map(s=>({key:s.id, name:s.name, value:+(s.value||0)})); }
+function kpis(list){
+  const vals = list.map(s=>s.value);
+  const total = vals.reduce((a,b)=>a+b,0);
+  const surp  = vals.filter(x=>x>0).reduce((a,b)=>a+b,0);
+  const def   = vals.filter(x=>x<0).reduce((a,b)=>a+b,0);
+  el('kTotal').textContent = fmt(total);
+  el('kSurp').textContent  = fmt(surp);
+  el('kDef').textContent   = fmt(def);
+  return {total, surp, def};
+}
+
+/* --------------------------- Allocation logic --------------------------- */
+/* Alt‑1: FULL cover; donors smallest‑surplus first; deficits fully covered */
+function allocateAlt1(list){
+  const items = list.map(s=>({key:s.key, name:s.name, init:s.value, transfer:0, residual:s.value}));
+  // credit deficits fully
+  const deficits = items.filter(x=>x.init<0);
+  const neededTotal = - deficits.reduce((a,b)=>a+b.init,0);
+  deficits.forEach(d=>{ d.transfer += -d.init; d.residual = 0; });
+  // take from donors, smallest surplus first
+  let remaining = neededTotal;
+  const donors = items.filter(x=>x.init>0).sort((a,b)=>a.init - b.init);
+  for (const d of donors){
+    if (remaining<=0) break;
+    const give = Math.min(d.init, remaining);
+    d.transfer -= give;
+    d.residual  = d.init - give;
+    remaining  -= give;
+  }
+  const sumTransfer = items.reduce((a,b)=>a+b.transfer,0);
+  const sumResidual = items.reduce((a,b)=>a+b.residual,0);
+  return {rows:items, sumTransfer, sumResidual};
+}
+
+/* Alt‑2: PARTIAL (fixed amount); recipients smallest‑deficit first; donors proportional (rounded if integers) */
+function allocateAlt2(list, amount){
+  const items = list.map(s=>({key:s.key, name:s.name, init:s.value, transfer:0, residual:s.value}));
+  const donorsList = items.filter(x=>x.init>0);
+  const totalSurplus = donorsList.reduce((a,b)=>a+b.init,0);
+  const deficitsList = items.filter(x=>x.init<0).map(x=>({ref:x, need:-x.init}));
+  const totalDefAbs  = deficitsList.reduce((a,b)=>a+b.need,0);
+  const toDistribute = Math.max(0, Math.min(amount||0, totalSurplus, totalDefAbs));
+
+  // credit recipients smallest first
+  deficitsList.sort((a,b)=>a.need - b.need);
+  let distributed = 0;
+  for (const r of deficitsList){
+    if (distributed>=toDistribute) break;
+    const give = Math.min(r.need, toDistribute - distributed);
+    r.ref.transfer += give;
+    r.ref.residual  += give;
+    distributed += give;
+  }
+
+  // take from donors proportionally to their surplus
+  if (distributed > 0 && donorsList.length){
+    const S = totalSurplus;
+    const raw = donorsList.map(d=>({ref:d, raw:(d.init / S) * distributed}));
+    const intMode = list.every(s=>Number.isInteger(s.value)) && Number.isInteger(toDistribute);
+    if (intMode){
+      let contribs = raw.map(x=>({ref:x.ref, val:Math.round(x.raw), frac:x.raw - Math.floor(x.raw)}));
+      let sum = contribs.reduce((a,b)=>a+b.val,0);
+      let diff = Math.round(distributed) - sum;
+      if (diff !== 0){
+        const sorted = contribs.sort((a,b)=> diff>0 ? (b.frac - a.frac) : (a.frac - b.frac) );
+        for (let i=0;i<Math.abs(diff);i++){ sorted[i % sorted.length].val += (diff>0 ? 1 : -1); }
+      }
+      contribs.forEach(c=>{
+        const take = Math.max(0, Math.min(c.val, c.ref.residual));
+        c.ref.transfer -= take;
+        c.ref.residual -= take;
+      });
+    }else{
+      let sumGiven = 0;
+      raw.forEach(x=>{ x.ref.transfer -= x.raw; x.ref.residual -= x.raw; sumGiven += x.raw; });
+      const rem = distributed - sumGiven;
+      if (Math.abs(rem) > 1e-9){
+        const biggest = raw.slice().sort((a,b)=>b.raw - a.raw)[0];
+        biggest.ref.transfer -= rem;
+        biggest.ref.residual -= rem;
+      }
+    }
+  }
+
+  const sumTransfer = items.reduce((a,b)=>a+b.transfer,0);
+  const sumResidual = items.reduce((a,b)=>a+b.residual,0);
+  return {rows:items, sumTransfer, sumResidual};
+}
+
+/* --------------------------- Rendering panels --------------------------- */
+function renderInitial(list, total){
+  const rows = list.map(s=>`
+    <tr>
+      <td style="text-align:left">${s.name}</td>
+      <td class="center ${sgnCls(s.value)}">${withPlus(s.value)}</td>
+    </tr>`).join('');
+  el('panelInitial').innerHTML = `
+    <div class="panelTitle">Before joining pool — Adjusted compliance balance</div>
+    <table>
+      <tr><th>Ship</th><th>Adjusted compliance balance</th></tr>
+      ${rows}
+      <tr>
+        <td style="text-align:left"><b>Total pool compliance balance</b></td>
+        <td class="center"><b>${fmt(total)}</b></td>
+      </tr>
+    </table>`;
+}
+function renderAlt(title, res, mountId, original){
+  const rows = res.rows.map(r=>{
+    const chip = r.transfer===0 ? `<span class="chip">0</span>`
+                : `<span class="chip ${r.transfer>=0?'pos':'neg'}">${r.transfer>0?'+':''}${fmt(r.transfer)}</span>`;
+    return `<tr>
+      <td style="text-align:left">${r.name}</td>
+      <td>${chip}</td>
+      <td class="center ${sgnCls(r.residual)}">${withPlus(r.residual)}</td>
+    </tr>`;
+  }).join('');
+  el(mountId).innerHTML = `
+    <div class="panelTitle">${title} — Verified compliance balance</div>
+    <table>
+      <tr><th>Ship</th><th>Transfer (verified)</th><th>Residual after pooling</th></tr>
+      ${rows}
+      <tr>
+        <td style="text-align:left"><b>Total pool compliance balance</b></td>
+        <td><b>${fmt(res.sumTransfer)}</b></td>
+        <td class="center"><b>${fmt(res.sumResidual)}</b></td>
+      </tr>
+    </table>`;
+}
+
+/* --------------------------- Orchestration --------------------------- */
+function compute(){
+  const list = readShips();
+  const {total} = kpis(list);
+
+  renderInitial(list, total);
+
+  const a1 = allocateAlt1(list);
+  renderAlt('Allocation alternative 1', a1, 'panelAlt1', total);
+
+  const amt = +el('alt2_amount').value || 0;
+  const a2 = allocateAlt2(list, amt);
+  renderAlt('Allocation alternative 2', a2, 'panelAlt2', total);
+}
+
+/* --------------------------- Toolbar actions --------------------------- */
+el('btnAdd').addEventListener('click', ()=>{
+  ships.push({id:makeId(), name:nextShipName(), value:0});
+  renderRows(); compute();
+});
+el('btnSample').addEventListener('click', ()=>{
+  ships = [
+    {id:makeId(), name:'Ship A', value:200},
+    {id:makeId(), name:'Ship B', value:-30},
+    {id:makeId(), name:'Ship C', value:-50},
+    {id:makeId(), name:'Ship D', value:10},
+    {id:makeId(), name:'Ship E', value:-100},
+  ];
+  renderRows(); compute();
+});
+el('btnClearRows').addEventListener('click', ()=>{
+  ships = []; renderRows(); compute();
+});
+el('alt2_amount').addEventListener('input', compute);
+
+/* --------------------------- Boot --------------------------- */
+(function init(){
+  // Start with sample A–E
+  ships = [
+    {id:makeId(), name:'Ship A', value:200},
+    {id:makeId(), name:'Ship B', value:-30},
+    {id:makeId(), name:'Ship C', value:-50},
+    {id:makeId(), name:'Ship D', value:10},
+    {id:makeId(), name:'Ship E', value:-100},
+  ];
+  renderRows();
+  compute();
+})();
+</script>
+</body>
+</html>
