@@ -22,7 +22,7 @@
     width:140px;padding:8px;background:#0e1b3a;color:#fff;border:1px solid var(--line);border-radius:6px
   }
   input[type="text"]{text-align:left}
-  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:16px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
   @media (max-width:980px){.grid{grid-template-columns:1fr}}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
   .panelTitle{font-weight:800;margin:4px 0 8px}
@@ -39,14 +39,32 @@
   .foot{font-size:12px;color:var(--muted);margin-top:10px}
   .delBtn{padding:6px 10px;border:1px solid #5a2a2a;background:#2a1111;color:#ffb3b3;border-radius:8px;cursor:pointer}
   .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+
+  /* -------- Optional: Cleaner printing -------- */
+  @media print {
+    body {
+      background: white !important;
+      color: black !important;
+    }
+    .toolbar, button, input, .foot {
+      display: none !important;
+    }
+    .card, table {
+      background: white !important;
+      color: black !important;
+    }
+    th, td {
+      border-color: #999 !important;
+    }
+    .chip { border-color:#ccc !important; color:#000 !important; background:#f5f5f5 !important; }
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>FuelEU Maritime — Pooling of Compliance</h1>
   <div class="muted">
-    Enter adjusted compliance balances (positive = surplus; negative = deficit).
-    Chips show <b>transfers</b> (+ received / − given). Large numbers show <b>residuals</b> after pooling.
+   
   </div>
 
   <!-- Inputs -->
@@ -58,8 +76,9 @@
       <button class="secondary" id="btnSample">Load sample (A–E)</button>
       <button class="warn" id="btnClearRows">Clear all ships</button>
 
-      <span class="muted">Alt‑2 amount (Figure 11.4 uses <b>100</b>):</span>
-      <input type="number" id="alt2_amount" value="100" min="0" step="1"/>
+      <!-- Print + Export PDF kept -->
+      <button class="secondary" id="btnPrint">Print</button>
+      <button class="secondary" id="btnPDF">Export PDF</button>
     </div>
 
     <table id="inputTable">
@@ -82,11 +101,13 @@
   <div class="grid">
     <div class="card" id="panelInitial"></div>
     <div class="card" id="panelAlt1"></div>
-    <div class="card" id="panelAlt2"></div>
   </div>
 
-  <div class="foot">The sum of residuals (bottom-right of each table) equals the initial total pool balance (conservation).</div>
+  <div class="foot"></div>
 </div>
+
+<!-- html2pdf.js CDN (for “Export PDF” button). -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-YcsIPyVt9cE3J4vS6OOsG0JY7G5s8q8kH3coQF/5wI1nT0vJ7x4bP6k2n2N3f3m3x2H4lqkzMZ3z0qYwWzK3WQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <script>
 /* --------------------------- State & helpers --------------------------- */
@@ -124,7 +145,7 @@ function renderRows(){
     const tdDel = document.createElement('td');
     const delBtn = document.createElement('button');
     delBtn.className='delBtn'; delBtn.textContent='Delete';
-    delBtn.addEventListener('click', ()=>{ ships = ships.filter(x=>x.id!==sh.id); renderRows(); compute(); });
+    delBtn.addEventListener('click', () =>{ ships = ships.filter(x=>x.id!==sh.id); renderRows(); compute(); });
     tdDel.appendChild(delBtn);
 
     tr.appendChild(tdName); tr.appendChild(tdVal); tr.appendChild(tdDel);
@@ -146,7 +167,7 @@ function kpis(list){
 }
 
 /* --------------------------- Allocation logic --------------------------- */
-/* Alt‑1: FULL cover; donors smallest‑surplus first; deficits fully covered */
+/* Alt 1: FULL cover; donors smallest surplus first; deficits fully covered */
 function allocateAlt1(list){
   const items = list.map(s=>({key:s.key, name:s.name, init:s.value, transfer:0, residual:s.value}));
   // credit deficits fully
@@ -163,61 +184,6 @@ function allocateAlt1(list){
     d.residual  = d.init - give;
     remaining  -= give;
   }
-  const sumTransfer = items.reduce((a,b)=>a+b.transfer,0);
-  const sumResidual = items.reduce((a,b)=>a+b.residual,0);
-  return {rows:items, sumTransfer, sumResidual};
-}
-
-/* Alt‑2: PARTIAL (fixed amount); recipients smallest‑deficit first; donors proportional (rounded if integers) */
-function allocateAlt2(list, amount){
-  const items = list.map(s=>({key:s.key, name:s.name, init:s.value, transfer:0, residual:s.value}));
-  const donorsList = items.filter(x=>x.init>0);
-  const totalSurplus = donorsList.reduce((a,b)=>a+b.init,0);
-  const deficitsList = items.filter(x=>x.init<0).map(x=>({ref:x, need:-x.init}));
-  const totalDefAbs  = deficitsList.reduce((a,b)=>a+b.need,0);
-  const toDistribute = Math.max(0, Math.min(amount||0, totalSurplus, totalDefAbs));
-
-  // credit recipients smallest first
-  deficitsList.sort((a,b)=>a.need - b.need);
-  let distributed = 0;
-  for (const r of deficitsList){
-    if (distributed>=toDistribute) break;
-    const give = Math.min(r.need, toDistribute - distributed);
-    r.ref.transfer += give;
-    r.ref.residual  += give;
-    distributed += give;
-  }
-
-  // take from donors proportionally to their surplus
-  if (distributed > 0 && donorsList.length){
-    const S = totalSurplus;
-    const raw = donorsList.map(d=>({ref:d, raw:(d.init / S) * distributed}));
-    const intMode = list.every(s=>Number.isInteger(s.value)) && Number.isInteger(toDistribute);
-    if (intMode){
-      let contribs = raw.map(x=>({ref:x.ref, val:Math.round(x.raw), frac:x.raw - Math.floor(x.raw)}));
-      let sum = contribs.reduce((a,b)=>a+b.val,0);
-      let diff = Math.round(distributed) - sum;
-      if (diff !== 0){
-        const sorted = contribs.sort((a,b)=> diff>0 ? (b.frac - a.frac) : (a.frac - b.frac) );
-        for (let i=0;i<Math.abs(diff);i++){ sorted[i % sorted.length].val += (diff>0 ? 1 : -1); }
-      }
-      contribs.forEach(c=>{
-        const take = Math.max(0, Math.min(c.val, c.ref.residual));
-        c.ref.transfer -= take;
-        c.ref.residual -= take;
-      });
-    }else{
-      let sumGiven = 0;
-      raw.forEach(x=>{ x.ref.transfer -= x.raw; x.ref.residual -= x.raw; sumGiven += x.raw; });
-      const rem = distributed - sumGiven;
-      if (Math.abs(rem) > 1e-9){
-        const biggest = raw.slice().sort((a,b)=>b.raw - a.raw)[0];
-        biggest.ref.transfer -= rem;
-        biggest.ref.residual -= rem;
-      }
-    }
-  }
-
   const sumTransfer = items.reduce((a,b)=>a+b.transfer,0);
   const sumResidual = items.reduce((a,b)=>a+b.residual,0);
   return {rows:items, sumTransfer, sumResidual};
@@ -241,7 +207,7 @@ function renderInitial(list, total){
       </tr>
     </table>`;
 }
-function renderAlt(title, res, mountId, original){
+function renderAlt(title, res, mountId){
   const rows = res.rows.map(r=>{
     const chip = r.transfer===0 ? `<span class="chip">0</span>`
                 : `<span class="chip ${r.transfer>=0?'pos':'neg'}">${r.transfer>0?'+':''}${fmt(r.transfer)}</span>`;
@@ -272,19 +238,15 @@ function compute(){
   renderInitial(list, total);
 
   const a1 = allocateAlt1(list);
-  renderAlt('Allocation alternative 1', a1, 'panelAlt1', total);
-
-  const amt = +el('alt2_amount').value || 0;
-  const a2 = allocateAlt2(list, amt);
-  renderAlt('Allocation alternative 2', a2, 'panelAlt2', total);
+  renderAlt('Allocation alternative 1', a1, 'panelAlt1');
 }
 
 /* --------------------------- Toolbar actions --------------------------- */
-el('btnAdd').addEventListener('click', ()=>{
+el('btnAdd').addEventListener('click', () =>{
   ships.push({id:makeId(), name:nextShipName(), value:0});
   renderRows(); compute();
 });
-el('btnSample').addEventListener('click', ()=>{
+el('btnSample').addEventListener('click', () =>{
   ships = [
     {id:makeId(), name:'Ship A', value:200},
     {id:makeId(), name:'Ship B', value:-30},
@@ -294,24 +256,38 @@ el('btnSample').addEventListener('click', ()=>{
   ];
   renderRows(); compute();
 });
-el('btnClearRows').addEventListener('click', ()=>{
+el('btnClearRows').addEventListener('click', () =>{
   ships = []; renderRows(); compute();
 });
-el('alt2_amount').addEventListener('input', compute);
 
-/* --------------------------- Boot --------------------------- */
-(function init(){
-  // Start with sample A–E
-  ships = [
-    {id:makeId(), name:'Ship A', value:200},
-    {id:makeId(), name:'Ship B', value:-30},
-    {id:makeId(), name:'Ship C', value:-50},
-    {id:makeId(), name:'Ship D', value:10},
-    {id:makeId(), name:'Ship E', value:-100},
-  ];
-  renderRows();
-  compute();
-})();
+/* -------- Print + Export PDF (kept) -------- */
+el('btnPrint').addEventListener('click', () => {
+  window.print(); // user can choose "Save as PDF"
+});
+el('btnPDF').addEventListener('click', () => {
+  // Export ONLY the results grid (2 cards). Change '.grid' to '.wrap' to export full page.
+  const element = document.querySelector('.grid');
+
+  // If html2pdf isn't loaded (offline), fallback to print dialog
+  if (typeof html2pdf === 'undefined') {
+    window.print();
+    return;
+  }
+
+  const opt = {
+    margin:       10,
+    filename:     'FuelEU_Pooling_Results.pdf',
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2 },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  html2pdf().set(opt).from(element).save();
+});
+
+/* Initial render */
+compute();
+renderRows();
 </script>
 </body>
 </html>
