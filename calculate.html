@@ -1,203 +1,444 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>FuelEU — Pooling of Compliance (Dynamic)</title>
-<style>
-  :root{
-    --bg:#0b132b; --panel:#121f3a; --line:#3a506b; --ink:#eaf1ff;
-    --muted:#a9b3c9; --chip:#0e1b3a; --pill:#1c2541;
-    --pos:#7fffd4; --neg:#ffb3b3; --green:#18d27c; --red:#ff6b6b;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,Segoe UI,Roboto,Arial}
-  .wrap{max-width:1120px;margin:20px auto;padding:0 14px 80px}
-  h1{margin:0 0 8px}
-  .muted{color:var(--muted);font-size:13px}
-  table{width:100%;border-collapse:collapse;background:var(--pill);margin-top:12px}
-  th,td{border:1px solid var(--line);padding:10px;text-align:center}
-  th{background:var(--line);color:#fff}
-  input[type="number"], input[type="text"]{
-    width:140px;padding:8px;background:#0e1b3a;color:#fff;border:1px solid var(--line);border-radius:6px
-  }
-  input[type="text"]{text-align:left}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
-  @media (max-width:980px){.grid{grid-template-columns:1fr}}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
-  .panelTitle{font-weight:800;margin:4px 0 8px}
-  .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:10px}
-  button{padding:9px 14px;border:none;border-radius:8px;cursor:pointer;font-weight:700;background:#5bc0be;color:#0b132b}
-  button.secondary{background:#3a86ff;color:white}
-  button.warn{background:#ff7b7b;color:#240b0b}
-  .kpis{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-  .kpi{background:#0e1b3a;border:1px solid var(--line);padding:8px 10px;border-radius:8px}
-  .center{font-weight:900;font-size:22px}
-  .pos{color:var(--pos)} .neg{color:var(--neg)}
-  .chip{display:inline-block;padding:6px 10px;border-radius:999px;background:var(--chip);border:1px solid var(--line);font-weight:800;min-width:56px}
-  .chip.pos{color:var(--green)} .chip.neg{color:var(--red)}
-  .foot{font-size:12px;color:var(--muted);margin-top:10px}
-  .delBtn{padding:6px 10px;border:1px solid #5a2a2a;background:#2a1111;color:#ffb3b3;border-radius:8px;cursor:pointer}
-  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FuelEU — Pooling of Compliance (Dynamic)</title>
+  <style>
+    :root {
+      --bg: #0b132b;
+      --panel: #121f3a;
+      --line: #3a506b;
+      --ink: #eaf1ff;
+      --muted: #a9b3c9;
+      --chip: #0e1b3a;
+      --pill: #1c2541;
+      --pos: #7fffd4;
+      --neg: #ffb3b3;
+      --green: #18d27c;
+      --red: #ff6b6b;
+    }
 
-  /* -------- Optional: Cleaner printing -------- */
-  @media print {
+    * {
+      box-sizing: border-box
+    }
+
     body {
-      background: white !important;
-      color: black !important;
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 15px/1.45 system-ui, Segoe UI, Roboto, Arial
     }
-    .toolbar, button, input, .foot {
-      display: none !important;
+
+    .wrap {
+      max-width: 1120px;
+      margin: 20px auto;
+      padding: 0 14px 80px
     }
-    .card, table {
-      background: white !important;
-      color: black !important;
+
+    h1 {
+      margin: 0 0 8px
     }
-    th, td {
-      border-color: #999 !important;
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px
     }
-    .chip { border-color:#ccc !important; color:#000 !important; background:#f5f5f5 !important; }
-  }
-</style>
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--pill);
+      margin-top: 12px
+    }
+
+    th,
+    td {
+      border: 1px solid var(--line);
+      padding: 10px;
+      text-align: center
+    }
+
+    th {
+      background: var(--line);
+      color: #fff
+    }
+
+    input[type="number"],
+    input[type="text"] {
+      width: 140px;
+      padding: 8px;
+      background: #0e1b3a;
+      color: #fff;
+      border: 1px solid var(--line);
+      border-radius: 6px
+    }
+
+    input[type="text"] {
+      text-align: left
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px
+    }
+
+    @media (max-width:980px) {
+      .grid {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px
+    }
+
+    .panelTitle {
+      font-weight: 800;
+      margin: 4px 0 8px
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 10px
+    }
+
+    button {
+      padding: 9px 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      background: #5bc0be;
+      color: #0b132b
+    }
+
+    button.secondary {
+      background: #3a86ff;
+      color: white
+    }
+
+    button.warn {
+      background: #ff7b7b;
+      color: #240b0b
+    }
+
+    .kpis {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px
+    }
+
+    .kpi {
+      background: #0e1b3a;
+      border: 1px solid var(--line);
+      padding: 8px 10px;
+      border-radius: 8px
+    }
+
+    .center {
+      font-weight: 900;
+      font-size: 22px
+    }
+
+    .pos {
+      color: var(--pos)
+    }
+
+    .neg {
+      color: var(--neg)
+    }
+
+    .chip {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--chip);
+      border: 1px solid var(--line);
+      font-weight: 800;
+      min-width: 56px
+    }
+
+    .chip.pos {
+      color: var(--green)
+    }
+
+    .chip.neg {
+      color: var(--red)
+    }
+
+    .foot {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 10px
+    }
+
+    .delBtn {
+      padding: 6px 10px;
+      border: 1px solid #5a2a2a;
+      background: #2a1111;
+      color: #ffb3b3;
+      border-radius: 8px;
+      cursor: pointer
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin: 8px 0
+    }
+
+    /* -------- Optional: Cleaner printing -------- */
+    @media print {
+      body {
+        background: white !important;
+        color: black !important;
+      }
+
+      .toolbar,
+      button,
+      input,
+      .foot {
+        display: none !important;
+      }
+
+      .card,
+      table {
+        background: white !important;
+        color: black !important;
+      }
+
+      th,
+      td {
+        border-color: #999 !important;
+      }
+
+      .chip {
+        border-color: #ccc !important;
+        color: #000 !important;
+        background: #f5f5f5 !important;
+      }
+    }
+  </style>
 </head>
+
 <body>
-<div class="wrap">
-  <h1>FuelEU Maritime — Pooling of Compliance</h1>
-  <div class="muted">
-   
-  </div>
+  <div class="wrap">
+    <h1 style="display:flex;align-items:center;gap:10px;">
 
-  <!-- Inputs -->
-  <div class="card">
-    <div class="panelTitle">Before joining pool — Adjusted compliance balance</div>
+      <!-- 🔥 Animated Ship Logo -->
+      <svg width="40" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="smokeGrad" x1="0" x2="1">
+            <stop offset="0%" stop-color="#a8ffea" />
+            <stop offset="100%" stop-color="#00d4ff" />
+          </linearGradient>
+        </defs>
 
-    <div class="toolbar">
-      <button id="btnAdd">+ Add ship</button>
-      <button class="secondary" id="btnSample">Load sample (A–E)</button>
-      <button class="warn" id="btnClearRows">Clear all ships</button>
+        <!-- Animated Smoke -->
+        <circle cx="58" cy="28" r="4" fill="url(#smokeGrad)">
+          <animate attributeName="cy" values="28;18;28" dur="3s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="1;0.2;1" dur="3s" repeatCount="indefinite" />
+        </circle>
 
-      <!-- Print + Export PDF kept -->
-      <button class="secondary" id="btnPrint">Print</button>
-      <button class="secondary" id="btnPDF">Export PDF</button>
-      <button class="secondary" id="btnCSV">Export CSV</button>
+        <circle cx="64" cy="24" r="3" fill="url(#smokeGrad)">
+          <animate attributeName="cy" values="24;14;24" dur="3.5s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0.8;0.1;0.8" dur="3.5s" repeatCount="indefinite" />
+        </circle>
+
+        <!-- Ship -->
+        <rect x="41" y="36" width="9" height="6" rx="1.5" fill="#ffffff" />
+        <rect x="52" y="32" width="4" height="10" rx="1" fill="#00d4ff" />
+
+        <path d="M12 52h56l-6 10c-1.4 2.3-4 3.7-6.8 3.7H30.8c-2.8 0-5.3-1.4-6.8-3.7L18 52z" fill="#1c2541"
+          stroke="#00d4ff" stroke-width="1.2" />
+
+        <!-- Waves -->
+        <path d="M14 68c4.5 3.5 9 3.5 13.5 0 4.5 3.5 9 3.5 13.5 0 4.5 3.5 9 3.5 13.5 0 4.5 3.5 9 3.5 13.5 0" fill="none"
+          stroke="#00d4ff" stroke-width="2" stroke-linecap="round" />
+      </svg>
+
+      FuelEU Maritime — Pooling of Compliance
+    </h1>
+    <div class="muted">
+      <!-- optional helper text -->
     </div>
 
-    <table id="inputTable">
-      <thead>
-        <tr><th style="width:40%">Ship</th><th style="width:40%">Adjusted compliance balance</th><th style="width:20%"></th></tr>
-      </thead>
-      <tbody id="rowsBody">
-        <!-- rows injected here -->
-      </tbody>
-    </table>
+    <!-- Inputs -->
+    <div class="card">
+      <div class="panelTitle">Before joining pool — Adjusted compliance balance</div>
 
-    <div class="kpis">
-      <div class="kpi">Total pool balance: <b id="kTotal">0</b></div>
-      <div class="kpi">Total surplus (≥0): <b id="kSurp">0</b></div>
-      <div class="kpi">Total deficit (&lt;0): <b id="kDef">0</b></div>
+      <div class="toolbar">
+        <button id="btnAdd">+ Add ship</button>
+        <button class="secondary" id="btnSample">Load sample (A–E)</button>
+        <button class="warn" id="btnClearRows">Clear all ships</button>
+
+        <!-- Import CSV (NEW) -->
+        <input id="csvInput" type="file" accept=".csv" style="display:none" />
+        <button class="secondary" id="btnImportCsv">Import CSV</button>
+
+        <!-- Print + Export PDF kept -->
+        <button class="secondary" id="btnPrint">Print</button>
+        <button class="secondary" id="btnPDF">Export PDF</button>
+        <button class="secondary" id="btnCSV">Export CSV</button>
+      </div>
+
+      <table id="inputTable">
+        <thead>
+          <tr>
+            <th style="width:40%">Ship</th>
+            <th style="width:40%">Adjusted compliance balance</th>
+            <th style="width:20%"></th>
+          </tr>
+        </thead>
+        <tbody id="rowsBody">
+          <!-- rows injected here -->
+        </tbody>
+      </table>
+
+      <div class="kpis">
+        <div class="kpi">Total pool balance: <b id="kTotal">0</b></div>
+        <div class="kpi">Total surplus (≥0): <b id="kSurp">0</b></div>
+        <div class="kpi">Total deficit (&lt;0): <b id="kDef">0</b></div>
+      </div>
     </div>
+
+    <!-- Result panels -->
+    <div class="grid">
+      <div class="card" id="panelInitial"></div>
+      <div class="card" id="panelAlt1"></div>
+    </div>
+
+    <div class="foot"></div>
   </div>
 
-  <!-- Result panels -->
-  <div class="grid">
-    <div class="card" id="panelInitial"></div>
-    <div class="card" id="panelAlt1"></div>
-  </div>
+  <!-- html2pdf.js CDN (for “Export PDF” button) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+    integrity="sha512-YcsIPyVt9cE3J4vS6OOsG0JY7G5s8q8kH3coQF/5wI1nT0vJ7x4bP6k2n2N3f3m3x2H4lqkzMZ3z0qYwWzK3WQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-  <div class="foot"></div>
-</div>
+  <script>
+    /* --------------------------- State & helpers --------------------------- */
+    let ships = []; // [{id, name, value}]
+    const el = id => document.getElementById(id);
+    const fmt = n => Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 });
+    const sgnCls = v => v >= 0 ? 'pos' : 'neg';
+    const withPlus = v => (v > 0 ? '+' : '') + fmt(v);
+    const makeId = () => Math.random().toString(36).slice(2, 9);
+    const nextShipName = () => {
+      const n = ships.length;
+      if (n < 26) return `Ship ${String.fromCharCode(65 + n)}`;
+      return `Ship ${n + 1}`;
+    };
 
-<!-- html2pdf.js CDN (for “Export PDF” button). -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-YcsIPyVt9cE3J4vS6OOsG0JY7G5s8q8kH3coQF/5wI1nT0vJ7x4bP6k2n2N3f3m3x2H4lqkzMZ3z0qYwWzK3WQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    /* --------------------------- Input table render --------------------------- */
+    function renderRows() {
+      const body = el('rowsBody');
+      body.innerHTML = '';
+      ships.forEach(sh => {
+        const tr = document.createElement('tr');
 
-<script>
-/* --------------------------- State & helpers --------------------------- */
-let ships = []; // [{id, name, value}]
-const el = id => document.getElementById(id);
-const fmt = n => Number(n).toLocaleString(undefined,{maximumFractionDigits:2});
-const sgnCls = v => v>=0 ? 'pos' : 'neg';
-const withPlus = v => (v>0?'+':'') + fmt(v);
-const makeId = () => Math.random().toString(36).slice(2,9);
-const nextShipName = () => {
-  const n = ships.length;
-  if (n < 26) return `Ship ${String.fromCharCode(65 + n)}`;
-  return `Ship ${n+1}`;
-};
+        const tdName = document.createElement('td');
+        const nameIn = document.createElement('input');
+        nameIn.type = 'text'; nameIn.value = sh.name; nameIn.placeholder = 'Ship name';
+        nameIn.addEventListener('input', () => { sh.name = nameIn.value; compute(); });
+        tdName.appendChild(nameIn);
 
-/* --------------------------- Input table render --------------------------- */
-function renderRows(){
-  const body = el('rowsBody');
-  body.innerHTML = '';
-  ships.forEach(sh => {
-    const tr = document.createElement('tr');
+        const tdVal = document.createElement('td');
+        const valIn = document.createElement('input');
+        valIn.type = 'number'; valIn.step = 'any'; valIn.value = sh.value;
+        valIn.addEventListener('input', () => { sh.value = Number(valIn.value || 0); compute(); });
+        tdVal.appendChild(valIn);
 
-    const tdName = document.createElement('td');
-    const nameIn = document.createElement('input');
-    nameIn.type = 'text'; nameIn.value = sh.name; nameIn.placeholder = 'Ship name';
-    nameIn.addEventListener('input', () => { sh.name = nameIn.value; compute(); });
-    tdName.appendChild(nameIn);
+        const tdDel = document.createElement('td');
+        const delBtn = document.createElement('button');
+        delBtn.className = 'delBtn'; delBtn.textContent = 'Delete';
+        delBtn.addEventListener('click', () => { ships = ships.filter(x => x.id !== sh.id); renderRows(); compute(); });
+        tdDel.appendChild(delBtn);
 
-    const tdVal = document.createElement('td');
-    const valIn = document.createElement('input');
-    valIn.type = 'number'; valIn.step = 'any'; valIn.value = sh.value;
-    valIn.addEventListener('input', () => { sh.value = Number(valIn.value || 0); compute(); });
-    tdVal.appendChild(valIn);
+        tr.appendChild(tdName); tr.appendChild(tdVal); tr.appendChild(tdDel);
+        body.appendChild(tr);
+      });
+    }
 
-    const tdDel = document.createElement('td');
-    const delBtn = document.createElement('button');
-    delBtn.className='delBtn'; delBtn.textContent='Delete';
-    delBtn.addEventListener('click', () =>{ ships = ships.filter(x=>x.id!==sh.id); renderRows(); compute(); });
-    tdDel.appendChild(delBtn);
+    /* --------------------------- KPI & read --------------------------- */
+    function readShips() { return ships.map(s => ({ key: s.id, name: s.name, value: +(s.value || 0) })); }
+    function kpis(list) {
+      const vals = list.map(s => s.value);
+      const total = vals.reduce((a, b) => a + b, 0);
+      const surp = vals.filter(x => x > 0).reduce((a, b) => a + b, 0);
+      const def = vals.filter(x => x < 0).reduce((a, b) => a + b, 0);
+      el('kTotal').textContent = fmt(total);
+      el('kSurp').textContent = fmt(surp);
+      el('kDef').textContent = fmt(def);
+      return { total, surp, def };
+    }
 
-    tr.appendChild(tdName); tr.appendChild(tdVal); tr.appendChild(tdDel);
-    body.appendChild(tr);
-  });
-}
+    /* --------------------------- Allocation logic --------------------------- */
+    /*
+      Alt 1 (revised Transfer (verified) rules):
+      - Only donors with init > 0 provide coverage.
+      - Donors never go below 0; deficits are covered only up to available surplus.
+      - Deficits move toward 0 (never above 0).
+      - sumTransfer = actual amount moved (>0), not net-zero.
+    */
+    function allocateAlt1(list) {
+      const items = list.map(s => ({ key: s.key, name: s.name, init: s.value, transfer: 0, residual: s.value }));
 
-/* --------------------------- KPI & read --------------------------- */
-function readShips(){ return ships.map(s=>({key:s.id, name:s.name, value:+(s.value||0)})); }
-function kpis(list){
-  const vals = list.map(s=>s.value);
-  const total = vals.reduce((a,b)=>a+b,0);
-  const surp  = vals.filter(x=>x>0).reduce((a,b)=>a+b,0);
-  const def   = vals.filter(x=>x<0).reduce((a,b)=>a+b,0);
-  el('kTotal').textContent = fmt(total);
-  el('kSurp').textContent  = fmt(surp);
-  el('kDef').textContent   = fmt(def);
-  return {total, surp, def};
-}
+      const donors = items.filter(x => x.init > 0).sort((a, b) => a.init - b.init); // smallest surplus first
+      const deficits = items.filter(x => x.init < 0); // recipients keep input order
 
-/* --------------------------- Allocation logic --------------------------- */
-/* Alt 1: FULL cover; donors smallest surplus first; deficits fully covered */
-function allocateAlt1(list){
-  const items = list.map(s=>({key:s.key, name:s.name, init:s.value, transfer:0, residual:s.value}));
-  // credit deficits fully
-  const deficits = items.filter(x=>x.init<0);
-  const neededTotal = - deficits.reduce((a,b)=>a+b.init,0);
-  deficits.forEach(d=>{ d.transfer += -d.init; d.residual = 0; });
-  // take from donors, smallest surplus first
-  let remaining = neededTotal;
-  const donors = items.filter(x=>x.init>0).sort((a,b)=>a.init - b.init);
-  for (const d of donors){
-    if (remaining<=0) break;
-    const give = Math.min(d.init, remaining);
-    d.transfer -= give;
-    d.residual  = d.init - give;
-    remaining  -= give;
-  }
-  const sumTransfer = items.reduce((a,b)=>a+b.transfer,0);
-  const sumResidual = items.reduce((a,b)=>a+b.residual,0);
-  return {rows:items, sumTransfer, sumResidual};
-}
+      const totalSurplus = donors.reduce((a, b) => a + b.init, 0);
+      const totalNeed = - deficits.reduce((a, b) => a + b.init, 0);
+      const toCover = Math.min(totalSurplus, totalNeed);
 
-/* --------------------------- Rendering panels --------------------------- */
-function renderInitial(list, total){
-  const rows = list.map(s=>`
+      // Credit recipients up to coverage (toward 0; never above 0)
+      let remaining = toCover;
+      for (const r of deficits) {
+        if (remaining <= 0) break;
+        const need = -r.init;
+        const take = Math.min(need, remaining);
+        r.transfer += take;                 // positive (received)
+        r.residual = r.init + take;        // <= 0
+        remaining -= take;
+      }
+
+      // Debit donors (never below 0)
+      remaining = toCover;
+      for (const d of donors) {
+        if (remaining <= 0) break;
+        const give = Math.min(d.init, remaining);
+        d.transfer -= give;                 // negative (given)
+        d.residual = d.init - give;        // >= 0
+        remaining -= give;
+      }
+
+      const sumResidual = items.reduce((a, b) => a + b.residual, 0);
+      const moved = toCover;
+
+      return { rows: items, sumTransfer: moved, sumResidual };
+    }
+
+    /* --------------------------- Rendering panels --------------------------- */
+    function renderInitial(list, total) {
+      const rows = list.map(s => `
     <tr>
       <td style="text-align:left">${s.name}</td>
       <td class="center ${sgnCls(s.value)}">${withPlus(s.value)}</td>
     </tr>`).join('');
-  el('panelInitial').innerHTML = `
+      document.getElementById('panelInitial').innerHTML = `
     <div class="panelTitle">Before joining pool — Adjusted compliance balance</div>
     <table>
       <tr><th>Ship</th><th>Adjusted compliance balance</th></tr>
@@ -207,18 +448,18 @@ function renderInitial(list, total){
         <td class="center"><b>${fmt(total)}</b></td>
       </tr>
     </table>`;
-}
-function renderAlt(title, res, mountId){
-  const rows = res.rows.map(r=>{
-    const chip = r.transfer===0 ? `<span class="chip">0</span>`
-                : `<span class="chip ${r.transfer>=0?'pos':'neg'}">${r.transfer>0?'+':''}${fmt(r.transfer)}</span>`;
-    return `<tr>
+    }
+    function renderAlt(title, res, mountId) {
+      const rows = res.rows.map(r => {
+        const chip = r.transfer === 0 ? `<span class="chip">0</span>`
+          : `<span class="chip ${r.transfer >= 0 ? 'pos' : 'neg'}">${r.transfer > 0 ? '+' : ''}${fmt(r.transfer)}</span>`;
+        return `<tr>
       <td style="text-align:left">${r.name}</td>
       <td>${chip}</td>
       <td class="center ${sgnCls(r.residual)}">${withPlus(r.residual)}</td>
     </tr>`;
-  }).join('');
-  el(mountId).innerHTML = `
+      }).join('');
+      document.getElementById(mountId).innerHTML = `
     <div class="panelTitle">${title} — Verified compliance balance</div>
     <table>
       <tr><th>Ship</th><th>Transfer (verified)</th><th>Residual after pooling</th></tr>
@@ -229,86 +470,197 @@ function renderAlt(title, res, mountId){
         <td class="center"><b>${fmt(res.sumResidual)}</b></td>
       </tr>
     </table>`;
-}
+    }
 
-/* --------------------------- Orchestration --------------------------- */
-function compute(){
-  const list = readShips();
-  const {total} = kpis(list);
+    /* --------------------------- CSV Import (NEW) --------------------------- */
+    /* Parse CSV into [{name, value}] using first two columns only */
+    function parseCSV(text) {
+      // Detect delimiter: comma or semicolon by first line
+      const firstLine = (text.split(/\r?\n/)[0] || '');
+      const commaCount = (firstLine.match(/,/g) || []).length;
+      const semiCount = (firstLine.match(/;/g) || []).length;
+      const delim = semiCount > commaCount ? ';' : ',';
 
-  renderInitial(list, total);
+      // Split into non-empty lines
+      const lines = text.split(/\r?\n/).map(r => r.trim()).filter(Boolean);
 
-  const a1 = allocateAlt1(list);
-  renderAlt('Allocation alternative 1', a1, 'panelAlt1');
-}
+      // Split a row respecting quotes
+      function splitRow(row) {
+        const out = [];
+        let cur = '', inQuotes = false;
+        for (let i = 0; i < row.length; i++) {
+          const ch = row[i];
+          if (ch === '"') {
+            if (inQuotes && row[i + 1] === '"') { cur += '"'; i++; } // escaped quote
+            else { inQuotes = !inQuotes; }
+          } else if (ch === delim && !inQuotes) {
+            out.push(cur); cur = '';
+          } else {
+            cur += ch;
+          }
+        }
+        out.push(cur);
+        return out.map(s => s.trim().replace(/^"(.*)"$/, '$1'));
+      }
 
-/* --------------------------- Toolbar actions --------------------------- */
-el('btnAdd').addEventListener('click', () =>{
-  ships.push({id:makeId(), name:nextShipName(), value:0});
-  renderRows(); compute();
-});
-el('btnSample').addEventListener('click', () =>{
-  ships = [
-    {id:makeId(), name:'Ship A', value:200},
-    {id:makeId(), name:'Ship B', value:-30},
-    {id:makeId(), name:'Ship C', value:-50},
-    {id:makeId(), name:'Ship D', value:10},
-    {id:makeId(), name:'Ship E', value:-100},
-  ];
-  renderRows(); compute();
-});
-el('btnClearRows').addEventListener('click', () =>{
-  ships = []; renderRows(); compute();
-});
+      // Detect and skip header if first two cells look like labels
+      let idx = 0;
+      if (lines.length) {
+        const h = splitRow(lines[0]).map(x => (x || '').toLowerCase());
+        const isHeader = (h[0] || '').includes('ship') && (
+          (h[1] || '').includes('adjust') ||
+          (h[1] || '').includes('balance') ||
+          (h[1] || '').includes('compliance')
+        );
+        if (isHeader) idx = 1;
+      }
 
-/* -------- Print + Export PDF (kept) -------- */
-el('btnPrint').addEventListener('click', () => {
-  window.print(); // user can choose "Save as PDF"
-});
-el('btnPDF').addEventListener('click', () => {
-  // Export ONLY the results grid (2 cards). Change '.grid' to '.wrap' to export full page.
-  const element = document.querySelector('.grid');
+      const rows = [];
+      for (let i = idx; i < lines.length; i++) {
+        const cells = splitRow(lines[i]);
+        if (cells.length < 2) continue;
 
-  // If html2pdf isn't loaded (offline), fallback to print dialog
-  if (typeof html2pdf === 'undefined') {
-    window.print();
-    return;
-  }
+        const name = String(cells[0] ?? '').trim();
+        let valRaw = String(cells[1] ?? '').trim();
+        if (!name || !valRaw) continue;
 
-  const opt = {
-    margin:       10,
-    filename:     'FuelEU_Pooling_Results.pdf',
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2 },
-    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-  };
+        // Normalize number with support for decimal comma and thousands
+        // Strategy:
+        //  - remove spaces
+        //  - if both '.' and ',' present: assume ',' is thousands and '.' is decimal => remove ',' only
+        //  - if only ',' present: treat as decimal comma => replace ',' with '.'
+        //  - finally, Number()
+        let numStr = valRaw.replace(/\s+/g, '');
+        const hasDot = numStr.includes('.');
+        const hasComma = numStr.includes(',');
+        if (hasDot && hasComma) {
+          // remove commas as thousands separators
+          numStr = numStr.replace(/,/g, '');
+        } else if (hasComma && !hasDot) {
+          // decimal comma
+          numStr = numStr.replace(/,/g, '.');
+        }
+        // remove thin spaces or non-breaking spaces if any
+        numStr = numStr.replace(/\u00A0|\u2009|\u202F/g, '');
 
-  html2pdf().set(opt).from(element).save();
-});
+        const value = Number(numStr);
+        if (!Number.isFinite(value)) continue;
 
-el('btnCSV').addEventListener('click', () => {
-  const list = readShips();
-  const a1 = allocateAlt1(list); 
-  
-  let csv = "Ship,Initial Balance,Transfer,Residual\n";
-  a1.rows.forEach(r => {
-    csv += `"${r.name}",${r.init},${r.transfer},${r.residual}\n`;
-  });
-  
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.setAttribute("href", url);
-  link.setAttribute("download", "FuelEU_Pooling_Results.csv");
-  link.style.visibility = 'hidden';
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-});
+        rows.push({ name, value });
+      }
+      return rows;
+    }
 
-/* Initial render */
-compute();
-renderRows();
-</script>
+    function importCSVFile(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const text = String(e.target.result || '');
+          const rows = parseCSV(text);
+          if (rows.length === 0) {
+            alert('No valid rows found. CSV must have two columns: Ship, Adjusted compliance balance.');
+            return;
+          }
+          ships = rows.map(r => ({ id: makeId(), name: r.name, value: r.value }));
+          renderRows(); compute();
+        } catch (err) {
+          console.error(err);
+          alert('Failed to parse CSV. Please check the file format.');
+        }
+      };
+      reader.onerror = () => alert('Could not read the file.');
+      reader.readAsText(file);
+    }
+
+    /* --------------------------- Orchestration --------------------------- */
+    function compute() {
+      const list = readShips();
+      const { total } = kpis(list);
+
+      renderInitial(list, total);
+
+      const a1 = allocateAlt1(list);
+      renderAlt('Allocation alternative 1', a1, 'panelAlt1');
+    }
+
+    /* --------------------------- Toolbar actions --------------------------- */
+    el('btnAdd').addEventListener('click', () => {
+      ships.push({ id: makeId(), name: nextShipName(), value: 0 });
+      renderRows(); compute();
+    });
+    el('btnSample').addEventListener('click', () => {
+      ships = [
+        { id: makeId(), name: 'Ship A', value: 200 },
+        { id: makeId(), name: 'Ship B', value: -30 },
+        { id: makeId(), name: 'Ship C', value: -50 },
+        { id: makeId(), name: 'Ship D', value: 10 },
+        { id: makeId(), name: 'Ship E', value: -100 },
+      ];
+      renderRows(); compute();
+    });
+    el('btnClearRows').addEventListener('click', () => {
+      ships = []; renderRows(); compute();
+    });
+
+    // Import CSV triggers (NEW)
+    el('btnImportCsv').addEventListener('click', () => {
+      el('csvInput').value = '';
+      el('csvInput').click();
+    });
+    el('csvInput').addEventListener('change', (ev) => {
+      const file = ev.target.files && ev.target.files[0];
+      if (file) importCSVFile(file);
+    });
+
+    /* -------- Print + Export PDF (kept) -------- */
+    el('btnPrint').addEventListener('click', () => {
+      window.print(); // user can choose "Save as PDF"
+    });
+    el('btnPDF').addEventListener('click', () => {
+      // Export ONLY the results grid (2 cards). Change '.grid' to '.wrap' to export full page.
+      const element = document.querySelector('.grid');
+
+      // If html2pdf isn't loaded (offline), fallback to print dialog
+      if (typeof html2pdf === 'undefined') {
+        window.print();
+        return;
+      }
+
+      const opt = {
+        margin: 10,
+        filename: 'FuelEU_Pooling_Results.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      html2pdf().set(opt).from(element).save();
+    });
+
+    el('btnCSV').addEventListener('click', () => {
+      const list = readShips();
+      const a1 = allocateAlt1(list); 
+
+      let csv = "Ship,Initial Balance,Transfer,Residual\n";
+      a1.rows.forEach(r => {
+        csv += `"${r.name}",${r.init},${r.transfer},${r.residual}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", "FuelEU_Pooling_Results.csv");
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+
+    /* Initial render */
+    compute();
+    renderRows();
+  </script>
 </body>
+
 </html>
