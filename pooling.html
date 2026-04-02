@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FuelEU — Pooling of Compliance (Dynamic)</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --bg2: #030910;
+      --panel: rgba(255, 255, 255, .04);
+      --panel-solid: #0d1b2a;
+      --line: rgba(255, 255, 255, .10);
+      --line-strong: rgba(255, 255, 255, .18);
+      --text: #e9f3ff;
+      --muted: #9fb4ca;
+      --accent: #33d6ff;
+      --accent-2: #70ffb8;
+      --accent-dark: #0d7ef7;
+      --danger: #ff6b81;
+      --danger-dark: #c81e1e;
+      --good: #56f39a;
+      --warn: #ffd37a;
+      --shadow: 0 18px 45px rgba(0, 0, 0, .28);
+      --radius: 20px;
+      --radius-sm: 14px;
+      --chip-bg: #0c1b30;
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      font-family: Inter, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(circle at top left, #15304b 0%, #07111f 45%, #030910 100%);
+      color: var(--text);
+    }
+
+    body {
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .wrap {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 24px 18px 80px;
+    }
+
+    .hero {
+      background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .03));
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+      padding: 28px;
+      margin-bottom: 18px;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      width: 320px;
+      height: 320px;
+      right: -60px;
+      top: -60px;
+      background: radial-gradient(circle, rgba(51, 214, 255, .22), transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .title-block h1 {
+      margin: 0 0 10px;
+      font-size: 34px;
+      line-height: 1.1;
+      letter-spacing: .2px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .brand-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(9, 20, 35, .78), rgba(9, 20, 35, .54));
+      border: 1px solid rgba(255, 255, 255, .10);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, .28), inset 0 1px 0 rgba(255, 255, 255, .05);
+      backdrop-filter: blur(10px);
+      min-width: max-content;
+    }
+
+    .brand-badge .logo-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+    }
+
+    .brand-badge .ship-logo {
+      width: 58px;
+      height: auto;
+      margin: 0;
+      flex: 0 0 auto;
+      filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.45));
+    }
+
+    .brand-badge .brand-title {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      line-height: 1.05;
+    }
+
+    .brand-badge .logo-text {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: #ffffff;
+    }
+
+    .brand-badge .logo-text span {
+      color: #00d4ff;
+    }
+
+    .brand-badge .brand-sub {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      color: #eaf5ff;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 16px;
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform .22s ease, box-shadow .22s ease, filter .22s ease, border-color .22s ease, background .22s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: -120%;
+      left: -38%;
+      width: 32%;
+      height: 340%;
+      background: linear-gradient(115deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, .10) 35%, rgba(255, 255, 255, .45) 50%, rgba(255, 255, 255, .10) 65%, rgba(255, 255, 255, 0) 100%);
+      transform: rotate(20deg) translateX(-220%);
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    button:hover::before {
+      opacity: 1;
+      animation: toolbarShine .72s ease forwards
+    }
+
+    button:hover {
+      transform: translateY(-2px)
+    }
+
+    button:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, .12)
+    }
+
+    @keyframes toolbarShine {
+      0% {
+        transform: rotate(20deg) translateX(-220%)
+      }
+
+      100% {
+        transform: rotate(20deg) translateX(420%)
+      }
+    }
+
+    #btnAdd {
+      background: linear-gradient(135deg, #1fb6ff, #0d7ef7);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, .08);
+      box-shadow: 0 10px 22px rgba(13, 126, 247, .28);
+    }
+
+    #btnAdd:hover {
+      background: linear-gradient(135deg, #34c0ff, #1687ff);
+      box-shadow: 0 14px 28px rgba(22, 135, 255, .34)
+    }
+
+    .secondary,
+    #btnSample,
+    #btnPrint,
+    #btnExportCsv,
+    #btnImportCsv {
+      background: linear-gradient(135deg, rgba(255, 255, 255, .12), rgba(160, 174, 192, .22));
+      color: #edf6ff;
+      border: 1px solid rgba(173, 190, 208, .28);
+    }
+
+    .secondary:hover,
+    #btnSample:hover,
+    #btnPrint:hover,
+    #btnExportCsv:hover,
+    #btnImportCsv:hover {
+      background: linear-gradient(135deg, rgba(255, 255, 255, .16), rgba(180, 194, 212, .28));
+      border-color: rgba(200, 214, 232, .34);
+      color: #fff;
+    }
+
+    .warn,
+    #btnClearRows {
+      background: linear-gradient(135deg, #ef4444, #c81e1e);
+      color: #fff;
+      border: 1px solid rgba(255, 221, 221, .16);
+      box-shadow: 0 10px 22px rgba(200, 30, 30, .24);
+    }
+
+    .warn:hover,
+    #btnClearRows:hover {
+      background: linear-gradient(135deg, #f05252, #d12626);
+      border-color: rgba(255, 233, 233, .24);
+      box-shadow: 0 14px 28px rgba(209, 38, 38, .30);
+    }
+
+    .summary-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .kpi {
+      background: rgba(255, 255, 255, .03);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      min-height: 96px;
+      position: relative;
+      overflow: hidden;
+      transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease, background .25s ease;
+    }
+
+    .kpi::before,
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(51, 214, 255, .16), rgba(112, 255, 184, .06) 45%, rgba(123, 97, 255, .14));
+      opacity: 0;
+      transition: opacity .25s ease;
+      pointer-events: none;
+    }
+
+    .kpi:hover,
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(51, 214, 255, .45);
+      box-shadow: 0 16px 34px rgba(0, 0, 0, .35), 0 0 0 1px rgba(51, 214, 255, .12) inset;
+      background: rgba(255, 255, 255, .05);
+    }
+
+    .kpi:hover::before,
+    .card:hover::before {
+      opacity: 1
+    }
+
+    .kpi-label,
+    .kpi .label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .kpi b,
+    .kpi .value {
+      font-size: 28px;
+      font-weight: 800;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .03));
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+      padding: 22px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .section-head,
+    .panelTitle {
+      margin: -22px -22px 18px -22px;
+      padding: 16px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, .10);
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10);
+      background: linear-gradient(135deg, rgba(111, 216, 255, .18), rgba(43, 168, 255, .10));
+      color: #f6fbff;
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+
+    .panelTitle::after {
+      content: '';
+      position: absolute;
+      inset: auto -40px -70px auto;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, .10), transparent 68%);
+      pointer-events: none;
+    }
+
+    .input-shell {
+      margin-bottom: 18px
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, .02);
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid rgba(255, 255, 255, .06);
+      padding: 12px 12px;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    thead th,
+    th {
+      background: #0a1726;
+      color: #b9d4ea;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .55px;
+      white-space: nowrap;
+      border-bottom: 1px solid var(--line);
+    }
+
+    tbody tr:nth-child(odd) td {
+      background: rgba(255, 255, 255, .02)
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none
+    }
+
+    input[type="number"],
+    input[type="text"] {
+      width: 100%;
+      min-width: 140px;
+      padding: 12px 14px;
+      background: #081524;
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 14px;
+      outline: none;
+      transition: border-color .2s ease, box-shadow .2s ease;
+      font-size: 14px;
+    }
+
+    input[type="number"]:focus,
+    input[type="text"]:focus {
+      border-color: rgba(51, 214, 255, .6);
+      box-shadow: 0 0 0 4px rgba(51, 214, 255, .12);
+    }
+
+    input[type="text"] {
+      text-align: left
+    }
+
+    .center {
+      font-weight: 900;
+      font-size: 22px
+    }
+
+    .pos {
+      color: #7fffd4
+    }
+
+    .neg {
+      color: #ffb3b3
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 72px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--chip-bg);
+      border: 1px solid rgba(255, 255, 255, .10);
+      font-weight: 800;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04);
+    }
+
+    .chip.pos {
+      color: var(--good)
+    }
+
+    .chip.neg {
+      color: var(--danger)
+    }
+
+    .foot {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 12px;
+      text-align: center;
+    }
+
+    .delBtn {
+      border: 1px solid rgba(0, 112, 192, .55);
+      background: rgba(0, 112, 192, .18);
+      color: #e9f3ff;
+      border-radius: 10px;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: none;
+    }
+
+    .delBtn:hover {
+      background: rgba(0, 112, 192, .35);
+      border-color: rgba(120, 200, 255, .75);
+      box-shadow: 0 6px 16px rgba(0, 112, 192, .25);
+    }
+
+    .result-caption {
+      color: var(--muted);
+      font-size: 12px;
+      margin: -8px 0 12px;
+    }
+
+    @media (max-width:1100px) {
+      .grid {
+        grid-template-columns: 1fr
+      }
+
+      .summary-strip {
+        grid-template-columns: 1fr
+      }
+
+      .hero-top {
+        flex-direction: column;
+        align-items: flex-start
+      }
+
+      .brand-badge {
+        width: 100%;
+        max-width: 100%;
+        justify-content: flex-start
+      }
+    }
+
+    @media (max-width:760px) {
+      .wrap {
+        padding: 14px
+      }
+
+      .hero {
+        padding: 20px;
+        border-radius: 22px
+      }
+
+      .title-block h1 {
+        font-size: 28px
+      }
+
+      .toolbar {
+        gap: 8px
+      }
+
+      button {
+        width: 100%
+      }
+
+      input[type="number"],
+      input[type="text"] {
+        min-width: 0
+      }
+
+      .panelTitle {
+        font-size: 15px
+      }
+
+      th,
+      td {
+        padding: 10px 8px
+      }
+    }
+
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .wrap {
+        display: none !important;
+      }
+
+      .print-only {
+        display: block !important;
+        padding: 40px;
+        font-family: 'Inter', system-ui, sans-serif;
+      }
+
+      .print-header {
+        border-bottom: 2px solid #33d6ff;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+      }
+
+      .print-header h1 {
+        margin: 0;
+        font-size: 28px;
+        color: #0f172a;
+      }
+
+      .print-header p {
+        margin: 8px 0 0;
+        color: #64748b;
+        font-size: 14px;
+      }
+
+      .print-section {
+        margin-bottom: 35px;
+      }
+
+      .print-section-title {
+        background: #f1f5f9;
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-weight: 800;
+        font-size: 16px;
+        margin-bottom: 15px;
+        border-left: 4px solid #33d6ff;
+      }
+
+      .print-kpis {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-bottom: 25px;
+      }
+
+      .print-kpi {
+        border: 1px solid #e2e8f0;
+        padding: 15px;
+        border-radius: 12px;
+      }
+
+      .print-kpi-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+        margin-bottom: 5px;
+      }
+
+      .print-kpi-value {
+        font-size: 22px;
+        font-weight: 800;
+      }
+
+      .print-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+
+      .print-table th {
+        background: #f8fafc;
+        text-align: left;
+        padding: 12px;
+        font-size: 11px;
+        text-transform: uppercase;
+        border-bottom: 2px solid #e2e8f0;
+        color: #475569;
+      }
+
+      .print-table td {
+        padding: 12px;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 14px;
+      }
+
+      .print-table tr:nth-child(even) td {
+        background: #fcfcfd;
+      }
+
+      .print-table .total-row td {
+        font-weight: 800;
+        border-top: 2px solid #e2e8f0;
+        background: #f8fafc;
+      }
+
+      .pos { color: #059669 !important; }
+      .neg { color: #dc2626 !important; }
+    }
+
+    /* Hide print-only by default */
+    .print-only {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="hero-top">
+        <div class="title-block">
+          <h1>FuelEU Maritime — Pooling of Compliance</h1>
+          <div class="muted">Professional dynamic pooling interface for adjusted compliance balance allocation, results
+            review and quick export actions.</div>
+        </div>
+        <a href="index.html" class="brand-badge" aria-label="FuelEU Maritime brand"
+          style="text-decoration: none; cursor: pointer;">
+          <div class="logo-box">
+            <svg class="ship-logo" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="smokeGradBrand" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0%" stop-color="#a8ffea" />
+                  <stop offset="100%" stop-color="#00d4ff" />
+                </linearGradient>
+                <linearGradient id="hullBrand" x1="0" x2="1">
+                  <stop offset="0%" stop-color="#0f2027" />
+                  <stop offset="100%" stop-color="#2c5364" />
+                </linearGradient>
+              </defs>
+              <g>
+                <circle cx="58" cy="28" r="5" fill="url(#smokeGradBrand)" opacity="0.8">
+                  <animate attributeName="cy" values="28;18;28" dur="3s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0.8;0.2;0.8" dur="3s" repeatCount="indefinite" />
+                </circle>
+                <circle cx="65" cy="24" r="4" fill="url(#smokeGradBrand)" opacity="0.6">
+                  <animate attributeName="cy" values="24;14;24" dur="3.5s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0.6;0.1;0.6" dur="3.5s" repeatCount="indefinite" />
+                </circle>
+                <circle cx="70" cy="20" r="3" fill="url(#smokeGradBrand)" opacity="0.5">
+                  <animate attributeName="cy" values="20;10;20" dur="4s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0.5;0.1;0.5" dur="4s" repeatCount="indefinite" />
+                </circle>
+              </g>
+              <rect x="41" y="36" width="9" height="6" rx="1.5" fill="#ffffff" />
+              <rect x="52" y="32" width="4" height="10" rx="1" fill="#00d4ff" />
+              <path d="M12 52h56l-6 10c-1.4 2.3-4 3.7-6.8 3.7H30.8c-2.8 0-5.3-1.4-6.8-3.7L18 52z" fill="url(#hullBrand)"
+                stroke="#00d4ff" stroke-width="1.2" />
+              <circle cx="30" cy="55.5" r="1.6" fill="#a8ffea" />
+              <circle cx="36" cy="55.5" r="1.6" fill="#a8ffea" />
+              <circle cx="42" cy="55.5" r="1.6" fill="#a8ffea" />
+              <circle cx="48" cy="55.5" r="1.6" fill="#a8ffea" />
+              <circle cx="54" cy="55.5" r="1.6" fill="#a8ffea" />
+              <path d="M14 68c4.5 3.5 9 3.5 13.5 0 4.5 3.5 9 3.5 13.5 0 4.5 3.5 9 3.5 13.5 0 4.5 3.5 9 3.5 13.5 0"
+                fill="none" stroke="#00d4ff" stroke-width="2.2" stroke-linecap="round" />
+            </svg>
+            <div class="brand-title">
+              <div class="logo-text">Fuel<span>EU</span></div>
+              <div class="brand-sub">Pooling Calculator</div>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="toolbar">
+        <button id="btnAdd">+ Add ship</button>
+        <button class="secondary" id="btnSample">Load sample (A–E)</button>
+        <button class="warn" id="btnClearRows">Clear all ships</button>
+        <input id="csvInput" type="file" accept=".csv" style="display:none" />
+        <button class="secondary" id="btnImportCsv">Import CSV</button>
+        <button class="secondary" id="btnPrint">Print</button>
+        <button class="secondary" id="btnExportCsv">Export CSV</button>
+      </div>
+      <div class="summary-strip kpis">
+        <div class="kpi">
+          <div class="kpi-label">Total pool balance</div>
+          <b id="kTotal">0</b>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Total surplus (≥0)</div>
+          <b id="kSurp">0</b>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Total deficit (&lt;0)</div>
+          <b id="kDef">0</b>
+        </div>
+      </div>
+    </section>
+    <div class="card input-shell">
+      <div class="panelTitle">Before joining pool — Adjusted compliance balance</div>
+      <div class="result-caption">Enter ship names and adjusted compliance balances. All calculations below remain
+        unchanged visually; the allocation logic is updated as requested.</div>
+      <table id="inputTable">
+        <thead>
+          <tr>
+            <th style="width:40%">Ship</th>
+            <th style="width:40%">Adjusted compliance balance</th>
+            <th style="width:20%"></th>
+          </tr>
+        </thead>
+        <tbody id="rowsBody">
+          <!-- rows injected here -->
+        </tbody>
+      </table>
+    </div>
+    <div class="grid">
+      <div class="card" id="panelInitial"></div>
+      <div class="card" id="panelAlt1"></div>
+    </div>
+    <div class="foot">Styled using the same dark glassmorphism visual language as the final FuelEU calculator design.
+    </div>
+  </div>
+
+  <div id="printContainer" class="print-only"></div>
+
+  <script>
+    /* --------------------------- State & helpers --------------------------- */
+    let ships = []; // [{id, name, value}]
+    const el = id => document.getElementById(id);
+    const fmt = n => Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 });
+    const sgnCls = v => v >= 0 ? 'pos' : 'neg';
+    const withPlus = v => (v > 0 ? '+' : '') + fmt(v);
+    const makeId = () => Math.random().toString(36).slice(2, 9);
+    const nextShipName = () => {
+      const n = ships.length;
+      if (n < 26) return `Ship ${String.fromCharCode(65 + n)}`;
+      return `Ship ${n + 1}`;
+    };
+
+    /* --------------------------- Input table render --------------------------- */
+    function renderRows() {
+      const body = el('rowsBody');
+      body.innerHTML = '';
+      ships.forEach(sh => {
+        const tr = document.createElement('tr');
+
+        const tdName = document.createElement('td');
+        const nameIn = document.createElement('input');
+        nameIn.type = 'text'; nameIn.value = sh.name; nameIn.placeholder = 'Ship name';
+        nameIn.addEventListener('input', () => { sh.name = nameIn.value; compute(); });
+        tdName.appendChild(nameIn);
+
+        const tdVal = document.createElement('td');
+        const valIn = document.createElement('input');
+        valIn.type = 'number'; valIn.step = 'any'; valIn.value = sh.value;
+        valIn.addEventListener('input', () => { sh.value = Number(valIn.value || 0); compute(); });
+        tdVal.appendChild(valIn);
+
+        const tdDel = document.createElement('td');
+        const delBtn = document.createElement('button');
+        delBtn.className = 'delBtn'; delBtn.textContent = 'Delete';
+        delBtn.addEventListener('click', () => { ships = ships.filter(x => x.id !== sh.id); renderRows(); compute(); });
+        tdDel.appendChild(delBtn);
+
+        tr.appendChild(tdName); tr.appendChild(tdVal); tr.appendChild(tdDel);
+        body.appendChild(tr);
+      });
+    }
+
+    /* --------------------------- KPI & read --------------------------- */
+    function readShips() { return ships.map(s => ({ key: s.id, name: s.name, value: +(s.value || 0) })); }
+    function kpis(list) {
+      const vals = list.map(s => s.value);
+      const total = vals.reduce((a, b) => a + b, 0);
+      const surp = vals.filter(x => x > 0).reduce((a, b) => a + b, 0);
+      const def = vals.filter(x => x < 0).reduce((a, b) => a + b, 0);
+      el('kTotal').textContent = fmt(total);
+      el('kSurp').textContent = fmt(surp);
+      el('kDef').textContent = fmt(def);
+      return { total, surp, def };
+    }
+
+    /* --------------------------- Allocation logic --------------------------- */
+    /*
+     Alt 1 (revised Transfer (verified) rules):
+     - Only donors with init > 0 provide coverage.
+     - Donors never go below 0; deficits are covered only up to available surplus.
+     - Deficits move toward 0 (never above 0).
+     - sumTransfer = actual amount moved (>0), not net-zero.
+    */
+    function allocateAlt1(list) {
+      const items = list.map(s => ({ key: s.key, name: s.name, init: s.value, transfer: 0, residual: s.value }));
+
+      const donors = items.filter(x => x.init > 0).sort((a, b) => a.init - b.init); // smallest surplus first
+      const deficits = items.filter(x => x.init < 0); // recipients keep input order
+
+      const totalSurplus = donors.reduce((a, b) => a + b.init, 0);
+      const totalNeed = -deficits.reduce((a, b) => a + b.init, 0);
+      const toCover = Math.min(totalSurplus, totalNeed);
+
+      // Credit recipients up to coverage (toward 0; never above 0)
+      let remaining = toCover;
+      for (const r of deficits) {
+        if (remaining <= 0) break;
+        const need = -r.init;
+        const take = Math.min(need, remaining);
+        r.transfer += take;                 // positive (received)
+        r.residual = r.init + take;         // <= 0
+        remaining -= take;
+      }
+
+      // Debit donors (never below 0)
+      remaining = toCover;
+      for (const d of donors) {
+        if (remaining <= 0) break;
+        const give = Math.min(d.init, remaining);
+        d.transfer -= give;                 // negative (given)
+        d.residual = d.init - give;         // >= 0
+        remaining -= give;
+      }
+
+      const sumResidual = items.reduce((a, b) => a + b.residual, 0);
+      const moved = toCover;
+
+      return { rows: items, sumTransfer: moved, sumResidual };
+    }
+
+    /* --------------------------- Rendering panels --------------------------- */
+    function renderInitial(list, total) {
+      const rows = list.map(s => `
+ <tr>
+ <td style="text-align:left">${s.name}</td>
+ <td class="center ${sgnCls(s.value)}">${withPlus(s.value)}</td>
+ </tr>`).join('');
+      el('panelInitial').innerHTML = `
+ <div class="panelTitle">Before joining pool — Adjusted compliance balance</div>
+ <table>
+ <tr><th>Ship</th><th>Adjusted compliance balance</th></tr>
+ ${rows}
+ <tr>
+ <td style="text-align:left"><b>Total pool compliance balance</b></td>
+ <td class="center"><b>${fmt(total)}</b></td>
+ </tr>
+ </table>`;
+    }
+    function renderAlt(title, res, mountId) {
+      const rows = res.rows.map(r => {
+        const chip = r.transfer === 0 ? `<span class="chip">0</span>`
+          : `<span class="chip ${r.transfer >= 0 ? 'pos' : 'neg'}">${r.transfer > 0 ? '+' : ''}${fmt(r.transfer)}</span>`;
+        return `<tr>
+ <td style="text-align:left">${r.name}</td>
+ <td>${chip}</td>
+ <td class="center ${sgnCls(r.residual)}">${withPlus(r.residual)}</td>
+ </tr>`;
+      }).join('');
+      el(mountId).innerHTML = `
+ <div class="panelTitle">${title} — Verified compliance balance</div>
+ <table>
+ <tr><th>Ship</th><th>Transfer (verified)</th><th>Residual after pooling</th></tr>
+ ${rows}
+ <tr>
+ <td style="text-align:left"><b>Total pool compliance balance</b></td>
+ <td><b>${fmt(res.sumTransfer)}</b></td>
+ <td class="center"><b>${fmt(res.sumResidual)}</b></td>
+ </tr>
+ </table>`;
+    }
+
+    /* --------------------------- CSV Import --------------------------- */
+    function parseCSV(text) {
+      const firstLine = (text.split(/\r?\n/)[0] || '');
+      const commaCount = (firstLine.match(/,/g) || []).length;
+      const semiCount = (firstLine.match(/;/g) || []).length;
+      const delim = semiCount > commaCount ? ';' : ',';
+
+      const lines = text.split(/\r?\n/).map(r => r.trim()).filter(Boolean);
+
+      function splitRow(row) {
+        const out = [];
+        let cur = '', inQuotes = false;
+        for (let i = 0; i < row.length; i++) {
+          const ch = row[i];
+          if (ch === '"') {
+            if (inQuotes && row[i + 1] === '"') { cur += '"'; i++; }
+            else { inQuotes = !inQuotes; }
+          } else if (ch === delim && !inQuotes) {
+            out.push(cur); cur = '';
+          } else {
+            cur += ch;
+          }
+        }
+        out.push(cur);
+        return out.map(s => s.trim().replace(/^"(.*)"$/, '$1'));
+      }
+
+      let idx = 0;
+      if (lines.length) {
+        const h = splitRow(lines[0]).map(x => (x || '').toLowerCase());
+        const isHeader = (h[0] || '').includes('ship') && (
+          (h[1] || '').includes('adjust') ||
+          (h[1] || '').includes('balance') ||
+          (h[1] || '').includes('compliance')
+        );
+        if (isHeader) idx = 1;
+      }
+
+      const rows = [];
+      for (let i = idx; i < lines.length; i++) {
+        const cells = splitRow(lines[i]);
+        if (cells.length < 2) continue;
+
+        const name = String(cells[0] ?? '').trim();
+        let valRaw = String(cells[1] ?? '').trim();
+        if (!name || !valRaw) continue;
+
+        let numStr = valRaw.replace(/\s+/g, '');
+        const hasDot = numStr.includes('.');
+        const hasComma = numStr.includes(',');
+        if (hasDot && hasComma) {
+          numStr = numStr.replace(/,/g, '');
+        } else if (hasComma && !hasDot) {
+          numStr = numStr.replace(/,/g, '.');
+        }
+        numStr = numStr.replace(/\u00A0|\u2009|\u202F/g, '');
+
+        const value = Number(numStr);
+        if (!Number.isFinite(value)) continue;
+
+        rows.push({ name, value });
+      }
+      return rows;
+    }
+
+    function importCSVFile(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const text = String(e.target.result || '');
+          const rows = parseCSV(text);
+          if (rows.length === 0) {
+            alert('No valid rows found. CSV must have two columns: Ship, Adjusted compliance balance.');
+            return;
+          }
+          ships = rows.map(r => ({ id: makeId(), name: r.name, value: r.value }));
+          renderRows(); compute();
+        } catch (err) {
+          console.error(err);
+          alert('Failed to parse CSV. Please check the file format.');
+        }
+      };
+      reader.onerror = () => alert('Could not read the file.');
+      reader.readAsText(file);
+    }
+
+    /* --------------------------- Orchestration --------------------------- */
+    function compute() {
+      const list = readShips();
+      const { total } = kpis(list);
+      renderInitial(list, total);
+      const a1 = allocateAlt1(list);
+      renderAlt('Allocation alternative 1', a1, 'panelAlt1');
+    }
+
+    /* --------------------------- Toolbar actions --------------------------- */
+    el('btnAdd').addEventListener('click', () => {
+      ships.push({ id: makeId(), name: nextShipName(), value: 0 });
+      renderRows(); compute();
+    });
+    el('btnSample').addEventListener('click', () => {
+      ships = [
+        { id: makeId(), name: 'Ship A', value: 200 },
+        { id: makeId(), name: 'Ship B', value: -30 },
+        { id: makeId(), name: 'Ship C', value: -50 },
+        { id: makeId(), name: 'Ship D', value: 10 },
+        { id: makeId(), name: 'Ship E', value: -100 },
+      ];
+      renderRows(); compute();
+    });
+    el('btnClearRows').addEventListener('click', () => {
+      ships = []; renderRows(); compute();
+    });
+
+    el('btnImportCsv').addEventListener('click', () => {
+      el('csvInput').value = '';
+      el('csvInput').click();
+    });
+    el('csvInput').addEventListener('change', (ev) => {
+      const file = ev.target.files && ev.target.files[0];
+      if (file) importCSVFile(file);
+    });
+
+    /* -------- Print + Export CSV -------- */
+    function preparePrint() {
+      const list = readShips();
+      const k = kpis(list);
+      const a1 = allocateAlt1(list);
+
+      const html = `
+        <div class="print-header">
+          <h1>FuelEU Maritime — Pooling of Compliance</h1>
+          <p>Generated report for compliance balance allocation and pool verification.</p>
+        </div>
+
+        <div class="print-kpis">
+          <div class="print-kpi">
+            <div class="print-kpi-label">Total Pool Balance</div>
+            <div class="print-kpi-value">${fmt(k.total)}</div>
+          </div>
+          <div class="print-kpi">
+            <div class="print-kpi-label">Total Surplus</div>
+            <div class="print-kpi-value pos">${fmt(k.surp)}</div>
+          </div>
+          <div class="print-kpi">
+            <div class="print-kpi-label">Total Deficit</div>
+            <div class="print-kpi-value neg">${fmt(k.def)}</div>
+          </div>
+        </div>
+
+        <div class="print-section">
+          <div class="print-section-title">Before Joining Pool — Adjusted Compliance Balance</div>
+          <table class="print-table">
+            <thead>
+              <tr>
+                <th>Ship</th>
+                <th style="text-align:right">Adjusted Compliance Balance</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${list.map(s => `
+                <tr>
+                  <td>${s.name}</td>
+                  <td style="text-align:right" class="${sgnCls(s.value)}">${withPlus(s.value)}</td>
+                </tr>
+              `).join('')}
+              <tr class="total-row">
+                <td>Total Pool Compliance Balance</td>
+                <td style="text-align:right">${fmt(k.total)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="print-section">
+          <div class="print-section-title">Verified Compliance Balance — Allocation Alternative 1</div>
+          <table class="print-table">
+            <thead>
+              <tr>
+                <th>Ship</th>
+                <th style="text-align:right">Transfer (Verified)</th>
+                <th style="text-align:right">Residual After Pooling</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${a1.rows.map(r => `
+                <tr>
+                  <td>${r.name}</td>
+                  <td style="text-align:right" class="${sgnCls(r.transfer)}">${r.transfer > 0 ? '+' : ''}${fmt(r.transfer)}</td>
+                  <td style="text-align:right" class="${sgnCls(r.residual)}">${withPlus(r.residual)}</td>
+                </tr>
+              `).join('')}
+              <tr class="total-row">
+                <td>Totals</td>
+                <td style="text-align:right">${fmt(a1.sumTransfer)}</td>
+                <td style="text-align:right">${fmt(a1.sumResidual)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div style="margin-top:50px; font-size:10px; color:#94a3b8; text-align:center;">
+          This is an automated compliance estimation report. FuelEU Maritime verified balances are subject to official regulatory review.
+        </div>
+      `;
+
+      el('printContainer').innerHTML = html;
+    }
+
+    el('btnPrint').addEventListener('click', () => {
+      preparePrint();
+      window.print();
+    });
+    el('btnExportCsv').addEventListener('click', () => {
+      const list = readShips();
+      const a1 = allocateAlt1(list);
+
+      const rows = [
+        ["Ship", "Adjusted compliance balance (Initial)", "Transfer (verified)", "Residual after pooling"]
+      ];
+
+      a1.rows.forEach(r => {
+        rows.push([r.name, r.init, r.transfer, r.residual]);
+      });
+
+      // Add a total row
+      const totalInitial = a1.rows.reduce((sum, r) => sum + r.init, 0);
+      rows.push(["Total", totalInitial, a1.sumTransfer, a1.sumResidual]);
+
+      const csvString = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\r\n");
+
+      // Force download by using a Data URI instead of a Blob URL
+      const encodedUri = "data:text/csv;charset=utf-8,\ufeff" + encodeURIComponent(csvString);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "FuelEU_Pooling_Results.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+
+    /* Initial render */
+    compute();
+    renderRows();
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,2667 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FuelEU Maritime Calculator</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: #0d1b2a;
+      --line: rgba(255, 255, 255, .1);
+      --text: #e9f3ff;
+      --muted: #9fb4ca;
+      --accent: #33d6ff;
+      --accent2: #70ffb8;
+      --danger: #ff6b81;
+      --good: #56f39a;
+      --shadow: 0 18px 45px rgba(0, 0, 0, .28);
+      --radius: 20px
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      margin: 0;
+      font-family: Inter, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(circle at top left, #15304b 0%, #07111f 45%, #030910 100%);
+      color: var(--text)
+    }
+
+    .wrap {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 24px 18px 80px;
+    }
+
+    .hero {
+      background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .03));
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+      padding: 28px;
+      margin-bottom: 18px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .03));
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      width: 320px;
+      height: 320px;
+      right: -60px;
+      top: -60px;
+      background: radial-gradient(circle, rgba(51, 214, 255, .22), transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .title-block h1 {
+      margin: 0 0 10px;
+      font-size: 34px;
+      line-height: 1.1;
+      letter-spacing: .2px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .brand-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(9, 20, 35, .78), rgba(9, 20, 35, .54));
+      border: 1px solid rgba(255, 255, 255, .10);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, .28), inset 0 1px 0 rgba(255, 255, 255, .05);
+      backdrop-filter: blur(10px);
+      min-width: max-content;
+    }
+
+    .brand-badge .logo-box {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+    }
+
+    .brand-badge .ship-logo {
+      width: 58px;
+      height: auto;
+      margin: 0;
+      flex: 0 0 auto;
+      filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.45));
+    }
+
+    .brand-badge .brand-title {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      line-height: 1.05;
+    }
+
+    .brand-badge .logo-text {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: #ffffff;
+    }
+
+    .brand-badge .logo-text span {
+      color: #00d4ff;
+    }
+
+    .brand-badge .brand-sub {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+      color: #eaf5ff;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 36px;
+      line-height: 1.1
+    }
+
+    .sub {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 18px
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px
+    }
+
+    .metric {
+      background: rgba(255, 255, 255, .03);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      min-height: 108px;
+      position: relative;
+      overflow: hidden;
+      transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease, background .25s ease
+    }
+
+    .metric:before,
+    .result-card:before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(51, 214, 255, .16), rgba(112, 255, 184, .06) 45%, rgba(123, 97, 255, .14));
+      opacity: 0;
+      transition: opacity .25s ease;
+      pointer-events: none
+    }
+
+    .metric:hover,
+    .result-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(51, 214, 255, .45);
+      box-shadow: 0 16px 34px rgba(0, 0, 0, .35), 0 0 0 1px rgba(51, 214, 255, .12) inset;
+      background: rgba(255, 255, 255, .05)
+    }
+
+    .metric:hover:before,
+    .result-card:hover:before {
+      opacity: 1
+    }
+
+    .metric .label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1
+    }
+
+    .metric .value {
+      font-size: 28px;
+      font-weight: 800;
+      position: relative;
+      z-index: 1
+    }
+
+    .metric small,
+    .result-card .mini {
+      position: relative;
+      z-index: 1
+    }
+
+    .status-good {
+      color: var(--good)
+    }
+
+    .status-bad {
+      color: var(--danger)
+    }
+
+    .section {
+      padding: 22px;
+      margin-top: 18px
+    }
+
+    .section h2 {
+      margin: 0 0 12px
+    }
+
+    .grid {
+      display: grid;
+      gap: 14px
+    }
+
+    .section {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: -22px -22px 18px -22px;
+      padding: 16px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, .10);
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10);
+    }
+
+    .section-head:after {
+      content: '';
+      position: absolute;
+      inset: auto -40px -70px auto;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, .10), transparent 68%);
+      pointer-events: none;
+    }
+
+    .section-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .section-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .7px;
+      color: #06111d;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, .18), inset 0 1px 0 rgba(255, 255, 255, .35);
+      flex: 0 0 auto;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: .2px;
+      line-height: 1.2;
+      color: #f6fbff;
+      text-transform: none;
+    }
+
+    .section-sub {
+      display: block;
+      font-size: 11px;
+      letter-spacing: .9px;
+      text-transform: uppercase;
+      color: rgba(233, 243, 255, .62);
+      margin-top: 3px;
+    }
+
+    #partASection .section-head {
+      background: linear-gradient(135deg, rgba(111, 216, 255, .18), rgba(43, 168, 255, .10));
+    }
+
+    #partASection .section-badge {
+      background: linear-gradient(135deg, rgba(111, 216, 255, .95), rgba(43, 168, 255, .85));
+    }
+
+    #partBSection .section-head {
+      background: linear-gradient(135deg, rgba(122, 240, 188, .18), rgba(57, 214, 160, .10));
+    }
+
+    #partBSection .section-badge {
+      background: linear-gradient(135deg, rgba(122, 240, 188, .95), rgba(57, 214, 160, .85));
+    }
+
+    #partCSection .section-head {
+      background: linear-gradient(135deg, rgba(255, 211, 122, .18), rgba(255, 174, 71, .10));
+    }
+
+    #partCSection .section-badge {
+      background: linear-gradient(135deg, rgba(255, 211, 122, .95), rgba(255, 174, 71, .85));
+    }
+
+    #partDSection .section-head {
+      background: linear-gradient(135deg, rgba(194, 155, 255, .18), rgba(140, 125, 255, .10));
+    }
+
+    #partDSection .section-badge {
+      background: linear-gradient(135deg, rgba(194, 155, 255, .95), rgba(140, 125, 255, .85));
+    }
+
+    .section-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, .08);
+      background: rgba(255, 255, 255, .04);
+      color: rgba(233, 243, 255, .72);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .22s ease;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, .10);
+      backdrop-filter: blur(4px);
+      flex: 0 0 auto;
+    }
+
+    .section-toggle:hover {
+      background: rgba(255, 255, 255, .09);
+      border-color: rgba(255, 255, 255, .16);
+      color: rgba(255, 255, 255, .9);
+      transform: translateY(-1px);
+    }
+
+    .section-toggle:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(111, 216, 255, .10);
+    }
+
+    .section.collapsed .section-content {
+      display: none;
+    }
+
+    .section.collapsed .section-toggle {
+      background: rgba(255, 255, 255, .025);
+      color: rgba(233, 243, 255, .60);
+    }
+
+    @media(max-width:760px) {
+      .section-head {
+        margin: -22px -22px 16px -22px;
+        padding: 14px 14px 14px 14px
+      }
+
+      .section-head h2 {
+        font-size: 15px
+      }
+
+      .section-sub {
+        font-size: 10px
+      }
+
+      .section-badge {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        font-size: 12px
+      }
+    }
+
+    .cols-6 {
+      grid-template-columns: repeat(3, minmax(0, 1fr))
+    }
+
+    .cols-5 {
+      grid-template-columns: repeat(5, minmax(0, 1fr))
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px
+    }
+
+    .field label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .7px
+    }
+
+    input,
+    select {
+      width: 100%;
+      background: #081524;
+      border: 1px solid rgba(255, 255, 255, .12);
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 14px;
+      outline: none
+    }
+
+    input:focus,
+    select:focus {
+      border-color: rgba(51, 214, 255, .6);
+      box-shadow: 0 0 0 4px rgba(51, 214, 255, .12)
+    }
+
+    input[readonly] {
+      background: #0a1726;
+      color: #d8ecff
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 13px 16px;
+      font-weight: 700;
+      cursor: pointer
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, var(--accent), #29a8ff);
+      color: #04111f
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, .07);
+      color: var(--text);
+      border: 1px solid var(--line)
+    }
+
+    .btn-success {
+      background: linear-gradient(90deg, var(--accent2), #4fe3c1);
+      color: #042014
+    }
+
+    .btn-danger {
+      background: linear-gradient(90deg, #2f3a4a, #1b2432);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, .15)
+    }
+
+    .btn-reset {
+      background: #C00000;
+      color: #FFFFFF;
+      border: 1px solid #C00000
+    }
+
+    .toolbar button {
+      position: relative;
+      overflow: hidden;
+      transition: transform .22s ease, box-shadow .22s ease, filter .22s ease, border-color .22s ease, background .22s ease
+    }
+
+    .toolbar button::before {
+      content: '';
+      position: absolute;
+      top: -120%;
+      left: -38%;
+      width: 32%;
+      height: 340%;
+      background: linear-gradient(115deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, .10) 35%, rgba(255, 255, 255, .45) 50%, rgba(255, 255, 255, .10) 65%, rgba(255, 255, 255, 0) 100%);
+      transform: rotate(20deg) translateX(-220%);
+      pointer-events: none;
+      opacity: 0
+    }
+
+    .toolbar button:hover::before {
+      opacity: 1;
+      animation: toolbarShine .72s ease forwards
+    }
+
+    .toolbar button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 26px rgba(0, 0, 0, .26)
+    }
+
+    .toolbar button:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, .12), 0 12px 26px rgba(0, 0, 0, .26)
+    }
+
+    @keyframes toolbarShine {
+      0% {
+        transform: rotate(20deg) translateX(-220%)
+      }
+
+      100% {
+        transform: rotate(20deg) translateX(420%)
+      }
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.06);
+      box-shadow: 0 14px 28px rgba(41, 168, 255, .28)
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, .12);
+      border-color: rgba(255, 255, 255, .24);
+      color: #ffffff
+    }
+
+    .btn-success:hover {
+      filter: brightness(1.05);
+      box-shadow: 0 14px 28px rgba(79, 227, 193, .24)
+    }
+
+    .btn-reset:hover {
+      background: #A80000;
+      border-color: #A80000;
+      color: #FFFFFF;
+      box-shadow: 0 14px 28px rgba(192, 0, 0, .28)
+    }
+
+    .partb-actions-head {
+      min-width: 120px;
+      text-align: center
+    }
+
+    .partb-action-cell {
+      text-align: center
+    }
+
+    .partb-row-remove {
+      border: 1px solid rgba(0, 112, 192, .55);
+      background: rgba(0, 112, 192, .18);
+      color: #e9f3ff;
+      border-radius: 10px;
+      padding: 6px 8px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: none;
+      transition: background .2s ease, border-color .2s ease, transform .2s ease, box-shadow .2s ease
+    }
+
+    .partb-row-remove:hover {
+      background: rgba(0, 112, 192, .35);
+      border-color: rgba(120, 200, 255, .75);
+      box-shadow: 0 6px 16px rgba(0, 112, 192, .25);
+      transform: translateY(-1px)
+    }
+
+    .partb-row-tools {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 14px
+    }
+
+    .partb-add-row {
+      border: 1px solid rgba(0, 112, 192, .55);
+      background: rgba(0, 112, 192, .18);
+      color: #e9f3ff;
+      border-radius: 10px;
+      padding: 6px 8px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      box-shadow: none;
+      transition: background .2s ease, border-color .2s ease, transform .2s ease, box-shadow .2s ease
+    }
+
+    .partb-add-row:hover {
+      background: rgba(0, 112, 192, .35);
+      border-color: rgba(120, 200, 255, .75);
+      box-shadow: 0 6px 16px rgba(0, 112, 192, .25);
+      transform: translateY(-1px)
+    }
+
+    .calc-error {
+      display: none;
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(255, 107, 129, .12);
+      border: 1px solid rgba(255, 107, 129, .35);
+      color: #ffd9df;
+      font-size: 13px;
+      line-height: 1.55;
+      max-width: 980px
+    }
+
+    .calc-error.show {
+      display: block
+    }
+
+    .calc-error b {
+      color: #fff
+    }
+
+    .table-wrap {
+      overflow: auto
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      background: #0a1726;
+      color: #b9d4ea;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .55px;
+      padding: 14px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      white-space: nowrap
+    }
+
+    tbody td {
+      padding: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, .06);
+      vertical-align: top
+    }
+
+    tbody tr:nth-child(odd) td {
+      background: rgba(255, 255, 255, .02)
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none
+    }
+
+    .mini {
+      font-size: 12px;
+      color: var(--muted)
+    }
+
+    .readonly {
+      display: inline-block;
+      padding: 12px 10px;
+      font-weight: 700;
+      color: #d9eeff
+    }
+
+    .calc-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 160px
+    }
+
+    .calc-stack .line {
+      font-size: 12px;
+      color: #dcecff
+    }
+
+    .calc-stack .line b {
+      color: #fff
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px
+    }
+
+    .result-card {
+      background: rgba(255, 255, 255, .03);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
+      transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease, background .25s ease
+    }
+
+    .result-card h3 {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      position: relative;
+      z-index: 1
+    }
+
+    .result-card .num {
+      font-size: 28px;
+      font-weight: 800;
+      position: relative;
+      z-index: 1
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700
+    }
+
+    .pill.good {
+      background: rgba(86, 243, 154, .12);
+      color: #caffdf;
+      border: 1px solid rgba(86, 243, 154, .25)
+    }
+
+    .pill.bad {
+      background: rgba(255, 107, 129, .12);
+      color: #ffd9df;
+      border: 1px solid rgba(255, 107, 129, .25)
+    }
+
+    /* Part B visible-only hiding */
+    #partBTable thead th:nth-child(5),
+    #partBTable thead th:nth-child(6),
+    #partBTable thead th:nth-child(7),
+    #partBTable thead th:nth-child(10),
+    #partBTable tbody td:nth-child(5),
+    #partBTable tbody td:nth-child(6),
+    #partBTable tbody td:nth-child(7),
+    #partBTable tbody td:nth-child(10) {
+      display: none
+    }
+
+    .detail-toggle {
+      margin: 4px 0 12px;
+      max-width: 240px
+    }
+
+    .eu-fields {
+      display: none
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 1000
+    }
+
+    .modal-overlay.active {
+      display: flex
+    }
+
+    .modal-card {
+      width: min(1100px, 100%);
+      max-height: 90vh;
+      overflow: auto;
+      background: linear-gradient(180deg, rgba(15, 32, 49, .98), rgba(10, 23, 38, .98));
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 22px
+    }
+
+    .modal-card h3 {
+      margin: 0 0 8px;
+      font-size: 22px
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 18px
+    }
+
+    .chart-shell {
+      padding: 22px 22px 16px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(12, 28, 45, .96), rgba(9, 20, 35, .94));
+      border: 1px solid rgba(86, 159, 255, .16);
+      backdrop-filter: blur(14px);
+      box-shadow: 0 14px 40px rgba(0, 0, 0, .38), inset 0 1px 0 rgba(255, 255, 255, .04);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative
+    }
+
+    .chart-shell:before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, rgba(51, 214, 255, .08), transparent 32%), radial-gradient(circle at bottom left, rgba(112, 255, 184, .05), transparent 28%);
+      pointer-events: none
+    }
+
+    .chart-shell h2 {
+      text-align: left;
+      margin: 0 0 14px;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: .4px;
+      color: #eaf5ff;
+      position: relative;
+      z-index: 1
+    }
+
+    .chart-shell canvas {
+      max-height: none;
+      height: 100% !important;
+      flex: 1 1 auto;
+      position: relative;
+      z-index: 1
+    }
+
+    .partd-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 20px;
+      align-items: stretch
+    }
+
+    .partd-col {
+      min-width: 0;
+      height: 440px
+    }
+
+    .partd-table-shell {
+      height: 100%;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 50px rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 25px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column
+    }
+
+    .partd-table-shell .table-wrap {
+      flex: 1 1 auto;
+      height: 100%;
+      overflow: auto
+    }
+
+    .partd-table-shell table {
+      width: 100%;
+      margin: 0;
+      border: none;
+      border-radius: 0;
+      border-collapse: collapse;
+      font-size: 14px
+    }
+
+    .partd-table-shell thead th {
+      background: rgba(255, 255, 255, 0.08);
+      color: #00e5ff;
+      font-size: 14px;
+      letter-spacing: 0;
+      text-transform: none;
+      text-align: center;
+      padding: 14px;
+      position: static
+    }
+
+    .partd-table-shell tbody td {
+      background: transparent;
+      border-bottom: none;
+      text-align: center;
+      padding: 14px
+    }
+
+    .partd-table-shell tbody tr:nth-child(even) td {
+      background: rgba(255, 255, 255, 0.03)
+    }
+
+    .partd-table-shell tbody tr:nth-child(odd) td {
+      background: transparent
+    }
+
+    .partd-table-shell tbody tr:hover td {
+      background: rgba(0, 229, 255, 0.08)
+    }
+
+    .partd-table-shell tbody td.partd-positive {
+      color: #00ffa6;
+      font-weight: 700
+    }
+
+    .partd-table-shell tbody td.partd-negative {
+      color: #ff6b6b;
+      font-weight: 700
+    }
+
+    .partd-right .chart-shell {
+      height: 100%
+    }
+
+    @media(max-width:1200px) {
+
+      .cols-6,
+      .cols-5,
+      .results-grid,
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr))
+      }
+
+      .partd-layout {
+        grid-template-columns: 1fr
+      }
+
+      .partd-col {
+        height: 440px
+      }
+    }
+
+    @media(max-width:760px) {
+
+      .cols-6,
+      .cols-5,
+      .results-grid,
+      .summary-grid {
+        grid-template-columns: 1fr
+      }
+
+      .partd-layout {
+        grid-template-columns: 1fr
+      }
+
+      .partd-col {
+        height: 400px
+      }
+
+      .wrap {
+        padding: 14px
+      }
+
+      h1 {
+        font-size: 28px
+      }
+    }
+
+    /* ===== PRINT: COVER PAGE + FULL REPORT ===== */
+    .print-cover-brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 6px 0 10px
+    }
+
+    .print-cover-logo {
+      width: 96px;
+      height: auto;
+      filter: drop-shadow(0 10px 18px rgba(0, 0, 0, .18))
+    }
+
+    .print-cover-name {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: .8px;
+      color: #0f172a;
+      line-height: 1.05
+    }
+
+    .print-cover-name span {
+      color: #00a3d8
+    }
+
+    .print-cover,
+    .print-report {
+      display: none
+    }
+
+    .print-report {
+      max-width: 100%;
+      font-family: Inter, Segoe UI, Arial, sans-serif
+    }
+
+    .print-report .print-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin: 0 0 12px;
+      color: #0f172a
+    }
+
+    .print-report .print-subtitle {
+      font-size: 14px;
+      font-weight: 800;
+      margin: 18px 0 8px;
+      color: #0f172a;
+      background: linear-gradient(90deg, #dbeafe 0%, #eff6ff 100%);
+      border-left: 5px solid #2563eb;
+      padding: 8px 10px;
+      border-radius: 6px
+    }
+
+    .print-report table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin: 0 0 14px;
+      background: #ffffff;
+      border-top: 1px solid #94a3b8;
+      border-bottom: 1px solid #94a3b8;
+      box-shadow: 0 0 0 1px #cbd5e1 inset
+    }
+
+    .print-report th,
+    .print-report td {
+      border: 1px solid #cbd5e1;
+      padding: 6px 8px;
+      vertical-align: top;
+      color: #0f172a;
+      text-align: left
+    }
+
+    .print-report thead th {
+      background: linear-gradient(180deg, #dbeafe 0%, #bfdbfe 100%);
+      font-weight: 800;
+      color: #0f172a;
+      border-top: 1px solid #94a3b8
+    }
+
+    .print-report tbody tr:first-child td {
+      border-top: 1px solid #94a3b8
+    }
+
+    .print-report tbody tr:last-child td {
+      border-bottom: 1px solid #94a3b8
+    }
+
+    .print-report tbody tr:nth-child(even) td {
+      background: #f8fbff
+    }
+
+    .print-report .label-cell {
+      width: 38%;
+      font-weight: 700;
+      background: #eef6ff;
+      color: #0f172a
+    }
+
+    .print-report .value-cell {
+      width: 62%;
+      background: #ffffff
+    }
+
+    .print-report .metric-title {
+      font-weight: 800;
+      color: #0f172a
+    }
+
+    .print-report .metric-note {
+      font-size: 11px;
+      color: #475569
+    }
+
+    .print-report .wide-table th,
+    .print-report .wide-table td {
+      font-size: 11px;
+      padding: 5px 6px
+    }
+
+    .print-graph-card {
+      margin: 14px 0 0;
+      padding: 14px 14px 8px;
+      border: 1px solid #bfdbfe;
+      background: linear-gradient(180deg, #eff6ff 0%, #f8fbff 100%);
+      border-radius: 12px;
+      box-shadow: 0 0 0 1px #dbeafe inset
+    }
+
+    .print-graph-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 6px
+    }
+
+    .print-graph-note {
+      font-size: 10px;
+      color: #475569;
+      margin: 0 0 8px
+    }
+
+    .print-graph-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 10px
+    }
+
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        color-adjust: exact
+      }
+
+      .wrap,
+      .modal-overlay,
+      .hero-logo {
+        display: none !important
+      }
+
+      .print-cover,
+      .print-report {
+        display: block !important
+      }
+
+      .print-cover {
+        page-break-after: always;
+        padding: 34px 26px 26px;
+        background: linear-gradient(180deg, #eff6ff 0%, #ffffff 48%, #ffffff 100%);
+        border: 2px solid #bfdbfe;
+        border-radius: 14px;
+        box-shadow: 0 0 0 6px #f8fbff inset;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 95vh
+      }
+
+      .print-cover h1 {
+        font-size: 28px;
+        margin: 18px 0 10px;
+        color: #0f172a
+      }
+
+      .print-cover .meta {
+        font-size: 14px;
+        margin-top: 24px;
+        color: #0f172a;
+        background: #ffffff;
+        border: 1px solid #dbeafe;
+        border-radius: 10px;
+        padding: 16px 20px;
+        display: inline-block;
+        min-width: 70%
+      }
+
+      .print-cover .meta p {
+        margin: 8px 0
+      }
+
+      .print-report {
+        page-break-before: always;
+        padding: 0
+      }
+
+      .print-report table {
+        page-break-inside: auto;
+        border-top: 1px solid #94a3b8 !important;
+        border-bottom: 1px solid #94a3b8 !important
+      }
+
+      .print-report thead {
+        display: table-header-group
+      }
+
+      .print-report tr {
+        page-break-inside: avoid;
+        page-break-after: auto
+      }
+
+      .print-report thead tr:first-child th {
+        border-top: 1px solid #94a3b8 !important
+      }
+
+      .print-report tbody tr:last-child td {
+        border-bottom: 1px solid #94a3b8 !important
+      }
+
+      .print-graph-card {
+        page-break-inside: avoid
+      }
+    }
+
+
+
+    .hidden {
+      display: none
+    }
+
+
+
+    /* ===== Animated fwind popup logo ===== */
+    .fwind-logo-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 0 14px 0
+    }
+
+    .fwind-animated-logo {
+      width: 220px;
+      max-width: 100%;
+      display: block
+    }
+
+    .fwind-animated-logo .fwind-wave {
+      animation: fwindWaveMove 4s ease-in-out infinite;
+      transform-box: fill-box;
+      transform-origin: center
+    }
+
+    .fwind-animated-logo .fwind-wind path {
+      stroke-dasharray: 100;
+      stroke-dashoffset: 100;
+      animation: fwindWindFlow 3s linear infinite
+    }
+
+    .fwind-animated-logo .fwind-sail {
+      transform-origin: 200px 180px;
+      animation: fwindSailMove 3s ease-in-out infinite;
+      transform-box: fill-box
+    }
+
+    .fwind-animated-logo .fwind-ship {
+      animation: fwindShipBob 3s ease-in-out infinite;
+      transform-box: fill-box;
+      transform-origin: center
+    }
+
+    @keyframes fwindWaveMove {
+
+      0%,
+      100% {
+        transform: translateX(0)
+      }
+
+      50% {
+        transform: translateX(10px)
+      }
+    }
+
+    @keyframes fwindWindFlow {
+      to {
+        stroke-dashoffset: 0
+      }
+    }
+
+    @keyframes fwindSailMove {
+
+      0%,
+      100% {
+        transform: rotate(0deg)
+      }
+
+      50% {
+        transform: rotate(-5deg)
+      }
+    }
+
+    @keyframes fwindShipBob {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(5px)
+      }
+    }
+
+
+    .partb-add-row .partb-add-icon {
+      display: inline-block;
+      font-size: 11px;
+      line-height: 1;
+      opacity: .68;
+      font-weight: 700;
+      margin-right: 4px;
+      transform: translateY(-1px)
+    }
+
+    /* ===== PART B COMPACT ROW SPACING ===== */
+    #partBTable thead th {
+      padding: 12px 8px
+    }
+
+    #partBTable tbody td {
+      padding: 6px 8px;
+      line-height: 1.2
+    }
+
+    #partBTable tbody td input,
+    #partBTable tbody td select {
+      padding: 8px 10px;
+      border-radius: 10px
+    }
+
+    #partBTable .readonly {
+      padding: 6px 4px
+    }
+
+    #partBTable .calc-stack {
+      gap: 2px;
+      min-width: 145px
+    }
+
+    #partBTable .calc-stack .line {
+      font-size: 11px;
+      line-height: 1.2
+    }
+
+    #partBTable .mini {
+      font-size: 10px;
+      line-height: 1.15
+    }
+
+    #partBTable .partb-row-remove {
+      padding: 7px 10px
+    }
+
+
+    /* ===== TOOLBAR BUTTON COLOUR UPDATE ===== */
+    .btn-primary {
+      background: linear-gradient(135deg, #1fb6ff, #0d7ef7);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, .08);
+      box-shadow: 0 10px 22px rgba(13, 126, 247, .28)
+    }
+
+    .btn-primary:hover {
+      filter: none;
+      background: linear-gradient(135deg, #34c0ff, #1687ff);
+      box-shadow: 0 14px 28px rgba(22, 135, 255, .34)
+    }
+
+    .btn-load-sample {
+      background: linear-gradient(135deg, rgba(255, 255, 255, .12), rgba(160, 174, 192, .22));
+      color: #edf6ff;
+      border: 1px solid rgba(173, 190, 208, .28)
+    }
+
+    .btn-load-sample:hover {
+      background: linear-gradient(135deg, rgba(255, 255, 255, .16), rgba(180, 194, 212, .28));
+      border-color: rgba(200, 214, 232, .34);
+      color: #ffffff
+    }
+
+    .btn-save-xml {
+      background: linear-gradient(135deg, rgba(123, 97, 255, .30), rgba(92, 77, 214, .42));
+      color: #f5f1ff;
+      border: 1px solid rgba(190, 177, 255, .24)
+    }
+
+    .btn-save-xml:hover {
+      background: linear-gradient(135deg, rgba(141, 115, 255, .38), rgba(108, 91, 228, .50));
+      border-color: rgba(202, 191, 255, .34);
+      color: #ffffff
+    }
+
+    .btn-import-xml {
+      background: linear-gradient(135deg, rgba(0, 167, 163, .28), rgba(0, 124, 145, .40));
+      color: #ebffff;
+      border: 1px solid rgba(137, 236, 227, .20)
+    }
+
+    .btn-import-xml:hover {
+      background: linear-gradient(135deg, rgba(0, 185, 180, .34), rgba(0, 141, 165, .48));
+      border-color: rgba(152, 244, 236, .30);
+      color: #ffffff
+    }
+
+    .btn-print-pdf {
+      background: linear-gradient(135deg, #28d17c, #0fa968);
+      color: #ffffff;
+      border: 1px solid rgba(210, 255, 228, .18);
+      box-shadow: 0 10px 22px rgba(15, 169, 104, .24)
+    }
+
+    .btn-print-pdf:hover {
+      filter: none;
+      background: linear-gradient(135deg, #34db87, #16b473);
+      box-shadow: 0 14px 28px rgba(22, 180, 115, .30)
+    }
+
+    .btn-reset-action {
+      background: linear-gradient(135deg, #ef4444, #c81e1e);
+      color: #ffffff;
+      border: 1px solid rgba(255, 221, 221, .16);
+      box-shadow: 0 10px 22px rgba(200, 30, 30, .24)
+    }
+
+    .btn-reset-action:hover {
+      background: linear-gradient(135deg, #f05252, #d12626);
+      border-color: rgba(255, 233, 233, .24);
+      color: #ffffff;
+      box-shadow: 0 14px 28px rgba(209, 38, 38, .30)
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="print-cover">
+    <div class="print-cover-brand" aria-label="FuelEU Maritime brand">
+      <svg class="print-cover-logo" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg" role="img"
+        aria-label="FuelEU ship logo">
+        <defs>
+          <linearGradient id="smokeGradPrint" x1="0" x2="1" y1="0" y2="1">
+            <stop offset="0%" stop-color="#a8ffea" />
+            <stop offset="100%" stop-color="#00d4ff" />
+          </linearGradient>
+          <linearGradient id="hullPrint" x1="0" x2="1">
+            <stop offset="0%" stop-color="#0f2027" />
+            <stop offset="100%" stop-color="#2c5364" />
+          </linearGradient>
+        </defs>
+        <g>
+          <circle cx="58" cy="28" r="5" fill="url(#smokeGradPrint)" opacity="0.8">
+            <animate attributeName="cy" values="28;18;28" dur="3s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0.8;0.2;0.8" dur="3s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="65" cy="24" r="4" fill="url(#smokeGradPrint)" opacity="0.6">
+            <animate attributeName="cy" values="24;14;24" dur="3.5s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0.6;0.1;0.6" dur="3.5s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="70" cy="20" r="3" fill="url(#smokeGradPrint)" opacity="0.5">
+            <animate attributeName="cy" values="20;10;20" dur="4s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0.5;0.1;0.5" dur="4s" repeatCount="indefinite" />
+          </circle>
+        </g>
+        <rect x="41" y="36" width="9" height="6" rx="1.5" fill="#ffffff" />
+        <rect x="52" y="32" width="4" height="10" rx="1" fill="#00d4ff" />
+        <path d="M12 52h56l-6 10c-1.4 2.3-4 3.7-6.8 3.7H30.8c-2.8 0-5.3-1.4-6.8-3.7L18 52z" fill="url(#hullPrint)"
+          stroke="#00d4ff" stroke-width="1.2" />
+        <circle cx="30" cy="55.5" r="1.6" fill="#a8ffea" />
+        <circle cx="36" cy="55.5" r="1.6" fill="#a8ffea" />
+        <circle cx="42" cy="55.5" r="1.6" fill="#a8ffea" />
+        <circle cx="48" cy="55.5" r="1.6" fill="#a8ffea" />
+        <circle cx="54" cy="55.5" r="1.6" fill="#a8ffea" />
+        <path d="M14 68c4.5 3.5 9 3.5 13.5 0 4.5 3.5 9 3.5 13.5 0 4.5 3.5 9 3.5 13.5 0 4.5 3.5 9 3.5 13.5 0" fill="none"
+          stroke="#00d4ff" stroke-width="2.2" stroke-linecap="round" />
+      </svg>
+      <div class="print-cover-name">Fuel<span>EU</span> Maritime</div>
+    </div>
+
+    <h1>FuelEU Maritime Compliance Report</h1>
+    <div class="meta">
+      <p><b>Ship Name:</b> <span id="cvShip"></span></p>
+      <p><b>IMO Number:</b> <span id="cvIMO"></span></p>
+      <p><b>Reporting Year:</b> <span id="cvYear"></span></p>
+      <p><b>Reporting Period:</b> <span id="cvPeriod"></span></p>
+      <p style="margin-top:30px;">Generated by FuelEU Maritime Calculator</p>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <section class="hero">
+      <div class="hero-top">
+        <div class="title-block">
+          <h1>FuelEU Maritime Calculator</h1>
+          <div class="muted">Professional GHG intensity calculator for maritime compliance, target assessment and
+            penalty
+            estimation.</div>
+        </div>
+        <a href="index.html" class="brand-badge" aria-label="FuelEU Maritime brand"
+          style="text-decoration: none; cursor: pointer;">
+          <div class="logo-box">
+            <svg class="ship-logo" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="smokeGradBrand" x1="0" x2="1" y1="0" y2="1">
+                  <stop offset="0%" stop-color="#a8ffea" />
+                  <stop offset="100%" stop-color="#00d4ff" />
+                </linearGradient>
+                <linearGradient id="hullBrand" x1="0" x2="1">
+                  <stop offset="0%" stop-color="#0f2027" />
+                  <stop offset="100%" stop-color="#2c5364" />
+                </linearGradient>
+              </defs>
+              <g>
+                <circle cx="58" cy="28" r="5" fill="url(#smokeGradBrand)" opacity="0.8">
+                  <animate attributeName="cy" values="28;18;28" dur="3s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0.8;0.2;0.8" dur="3s" repeatCount="indefinite" />
+                </circle>
+                <circle cx="65" cy="24" r="4" fill="url(#smokeGradBrand)" opacity="0.6">
+                  <animate attributeName="cy" values="24;14;24" dur="3.5s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0.6;0.1;0.6" dur="3.5s" repeatCount="indefinite" />
+                </circle>
+                <circle cx="70" cy="20" r="3" fill="url(#smokeGradBrand)" opacity="0.5">
+                  <animate attributeName="cy" values="20;10;20" dur="4s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0.5;0.1;0.5" dur="4s" repeatCount="indefinite" />
+                </circle>
+              </g>
+              <rect x="41" y="36" width="9" height="6" rx="1.5" fill="#ffffff" />
+              <rect x="52" y="32" width="4" height="10" rx="1" fill="#00d4ff" />
+              <path d="M12 52h56l-6 10c-1.4 2.3-4 3.7-6.8 3.7H30.8c-2.8 0-5.3-1.4-6.8-3.7L18 52z" fill="url(#hullBrand)"
+                stroke="#00d4ff" stroke-width="1.2" />
+              <circle cx="30" cy="55.5" r="1.6" fill="#a8ffea" />
+              <circle cx="36" cy="55.5" r="1.6" fill="#a8ffea" />
+              <circle cx="42" cy="55.5" r="1.6" fill="#a8ffea" />
+              <circle cx="48" cy="55.5" r="1.6" fill="#a8ffea" />
+              <circle cx="54" cy="55.5" r="1.6" fill="#a8ffea" />
+              <path d="M14 68c4.5 3.5 9 3.5 13.5 0 4.5 3.5 9 3.5 13.5 0 4.5 3.5 9 3.5 13.5 0 4.5 3.5 9 3.5 13.5 0"
+                fill="none" stroke="#00d4ff" stroke-width="2.2" stroke-linecap="round" />
+            </svg>
+            <div class="brand-title">
+              <div class="logo-text">Fuel<span>EU</span></div>
+              <div class="brand-sub">Maritime Calculator</div>
+            </div>
+          </div>
+        </a>
+      </div>
+
+      <div class="toolbar">
+        <button class="btn-primary" onclick="handleCalculate()">Calculate now</button>
+        <button class="btn-secondary btn-load-sample" onclick="loadSampleCase()">Load sample case</button>
+        <button class="btn-secondary btn-save-xml" onclick="downloadXml()">Save XML</button>
+        <button class="btn-secondary btn-import-xml" onclick="document.getElementById('xmlFileInput').click()">Import
+          XML</button>
+        <button class="btn-success btn-print-pdf" onclick="window.print()">Print / Save PDF</button>
+        <button class="btn-reset btn-reset-action" onclick="resetForm()">Reset</button>
+        <input id="xmlFileInput" type="file" accept=".xml,text/xml,application/xml" style="display:none">
+      </div>
+      <div id="calcValidationError" class="calc-error" aria-live="polite"></div>
+    </section>
+    <section class="card section" id="partASection">
+      <div class="section-head">
+        <div class="section-title-wrap"><span class="section-badge">A</span>
+          <div>
+            <h2>Part A · Data identifying the ship and company</h2><span class="section-sub">Ship particulars, reporting
+              period and operational inputs</span>
+          </div>
+        </div><button type="button" class="section-toggle" data-target="partASection" aria-expanded="true"
+          aria-label="Collapse A">∧</button>
+      </div>
+      <div class="section-content">
+        <div class="grid cols-5">
+          <div class="field"><label>Name of ship</label><input id="shipName"></div>
+          <div class="field"><label>IMO number</label><input id="imoNumber"></div>
+          <div class="field"><label>Reporting year</label><select id="reportingYear"></select></div>
+          <div class="field"><label>Reporting period From</label><input id="fromDate" type="date"></div>
+          <div class="field"><label>Reporting period To</label><input id="toDate" type="date"></div>
+        </div>
+        <div class="grid cols-5" style="margin-top:14px;">
+          <div class="field"><label>Total distance travelled (nm)</label><input id="totalDistance" type="number" min="0"
+              step="0.01" value="0"></div>
+          <div class="field"><label>Time spent at sea (hours)</label><input id="timeSea" type="number" min="0"
+              step="0.01" value="0"></div>
+          <div class="field"><label>Time at anchorage (hours)</label><input id="timeAnchorage" type="number" min="0"
+              step="0.01" value="0"></div>
+          <div class="field"><label>Total number of fuels</label><select id="fuelCount"></select></div>
+          <div class="field"><label>Wind-assisted propulsion (applicable)</label><select id="windApplicable">
+              <option value="NO">NO</option>
+              <option value="YES">YES</option>
+            </select></div>
+        </div>
+      </div>
+    </section>
+    <section class="card section" id="partBSection">
+      <div class="section-head">
+        <div class="section-title-wrap"><span class="section-badge">B</span>
+          <div>
+            <h2>Part B · GHG intensity calculation by fuel</h2><span class="section-sub">Fuel pathways, tonnes
+              allocation and emission factor inputs</span>
+          </div>
+        </div><button type="button" class="section-toggle" data-target="partBSection" aria-expanded="true"
+          aria-label="Collapse B">∧</button>
+      </div>
+      <div class="section-content">
+        <div class="table-wrap">
+          <table id="partBTable">
+            <thead>
+              <tr>
+                <th style="min-width:240px;">Pathway name / Consumer</th>
+                <th>PoS/PoC available</th>
+                <th>Active LCV<br><span class="mini">MJ/g</span></th>
+                <th>Active E value<br><span class="mini">gCO2eq/MJ</span></th>
+                <th>CH4 slip<br><span class="mini">%</span></th>
+                <th>WtT / WTW<br><span class="mini">WtT / WTW</span></th>
+                <th>TtW details<br><span class="mini">CO2 / CH4 / N2O / Total</span></th>
+                <th>100% covered<br><span class="mini">tonnes</span></th>
+                <th>50% covered<br><span class="mini">tonnes</span></th>
+                <th>Energy in scope<br><span class="mini">10^6 MJ</span></th>
+                <th class="partb-actions-head">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="fuelRows"></tbody>
+          </table>
+        </div>
+        <div class="partb-row-tools"><button type="button" class="partb-add-row" onclick="addFuelRow()"><span
+              class="partb-add-icon">+</span> Add Row</button></div>
+      </div>
+    </section>
+    <section class="card section hidden" id="partCSection">
+      <div class="section-head">
+        <div class="section-title-wrap"><span class="section-badge">C</span>
+          <div>
+            <h2>Part C · Compliance balance and penalty calculations</h2><span class="section-sub">Computed compliance
+              balance, target comparison and penalties</span>
+          </div>
+        </div><button type="button" class="section-toggle" data-target="partCSection" aria-expanded="true"
+          aria-label="Collapse C">∧</button>
+      </div>
+      <div class="section-content">
+        <div class="field detail-toggle"><label>Show detailed result</label><select id="detailResultToggle">
+            <option value="NO" selected>NO</option>
+            <option value="YES">YES</option>
+          </select></div>
+        <div class="grid cols-6">
+          <div class="field"><label>Selected fwind</label><input id="fwind" readonly value="1.00"></div>
+          <div class="field"><label>Reduction band</label><input id="reductionLabel" readonly></div>
+          <div class="field"><label>Reporting period summary</label><input id="periodSummary" readonly
+              value="Select From and To dates"></div>
+        </div><input id="windRule" type="hidden" value=""><input id="actualFormula" type="hidden" value=""><input
+          id="penaltyMode" type="hidden" value="EUR NA when compliant">
+        <div class="summary-grid">
+          <div class="metric">
+            <div class="label">Total GHG Intensity</div>
+            <div class="value" id="heroActual">0.00000</div><small>Actual = Weighted WtT + Weighted TtW, adjusted by
+              fwind only if wind is enabled.</small>
+          </div>
+          <div class="metric">
+            <div class="label">Current Target</div>
+            <div class="value" id="heroTarget">89.3368</div><small>Reference value 91.16 gCO2eq/MJ reduced by FuelEU
+              year band.</small>
+          </div>
+          <div class="metric">
+            <div class="label">Compliance Balance</div>
+            <div class="value" id="heroBalance">0.00 tCO2eq</div><small>Displayed in tCO2eq.</small>
+          </div>
+          <div class="metric">
+            <div class="label">Status</div>
+            <div class="value status-good" id="heroStatus">Ready</div><small id="heroPenalty">Penalty: EUR NA</small>
+          </div>
+        </div>
+        <div class="results-grid" style="margin-top:18px;">
+          <div class="result-card">
+            <h3>Total Energy in Scope</h3>
+            <div class="num" id="totalEnergy">0</div>
+            <div class="mini">MJ</div>
+          </div>
+          <div class="result-card">
+            <h3>Weighted WtT</h3>
+            <div class="num" id="weightedWtt">0.00000</div>
+            <div class="mini">Σ(WtT × energy) / Σ(energy × reward)</div>
+          </div>
+          <div class="result-card">
+            <h3>Weighted TtW</h3>
+            <div class="num" id="weightedTtw">0.00000</div>
+            <div class="mini">Σ(TtW × energy) / Σ(energy × reward)</div>
+          </div>
+          <div class="result-card">
+            <h3>FuelEU Penalty</h3>
+            <div class="num" id="penalty">EUR NA</div>
+            <div class="mini">Only calculated when balance is negative</div>
+          </div>
+        </div>
+        <div style="display:none;"><span class="pill good" id="statusPill">READY</span><span class="mini"
+            id="statusText">Enter data to calculate compliance.</span></div>
+      </div>
+    </section>
+    <section class="card section hidden" id="partDSection">
+      <div class="section-head">
+        <div class="section-title-wrap"><span class="section-badge">D</span>
+          <div>
+            <h2>Part D · Long-Term Compliance Outlook</h2><span class="section-sub">Milestone-year outlook and projected
+              penalty exposure</span>
+          </div>
+        </div><button type="button" class="section-toggle" data-target="partDSection" aria-expanded="true"
+          aria-label="Collapse D">∧</button>
+      </div>
+      <div class="section-content">
+        <div class="partd-layout">
+          <div class="partd-col partd-left">
+            <div class="partd-table-shell">
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Year</th>
+                      <th>Reduction (%)</th>
+                      <th>Required GHG <span class="mini">(gCO2eq/MJ)</span></th>
+                      <th>Compliance Balance</th>
+                      <th>Penalty</th>
+                    </tr>
+                  </thead>
+                  <tbody id="yearResultsBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="partd-col partd-right">
+            <div class="chart-shell"><canvas id="penaltyChart"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div class="modal-overlay" id="fwindModal">
+    <div class="modal-card" style="width:min(460px,100%);">
+      <h3>Select fwind</h3>
+      <div class="fwind-logo-wrap">
+        <svg class="fwind-animated-logo" viewBox="0 0 400 300" aria-label="Wind assisted ship logo" role="img">
+          <g class="fwind-wind" stroke="#7fdfff" stroke-width="3" fill="none">
+            <path d="M20 80 Q120 50 200 80" />
+            <path d="M40 110 Q140 80 220 110" />
+            <path d="M60 140 Q160 110 240 140" />
+          </g>
+          <g class="fwind-ship">
+            <polygon class="fwind-sail" points="200,80 200,180 270,180" fill="#4fd1c5" />
+            <line x1="200" y1="80" x2="200" y2="180" stroke="#ffffff" stroke-width="3" />
+            <path d="M150 180 L280 180 L250 210 L170 210 Z" fill="#1e90ff" />
+          </g>
+          <g class="fwind-wave" fill="#0ea5e9">
+            <path d="M120 210 Q150 200 180 210 T240 210 T300 210" opacity="0.7" />
+            <path d="M120 220 Q150 210 180 220 T240 220 T300 220" opacity="0.5" />
+          </g>
+        </svg>
+      </div>
+      <div class="sub" style="margin-bottom:16px;">Choose the applicable fwind value for wind-assisted propulsion.</div>
+      <div class="field"><label>fwind</label><select id="modalFwindSelect">
+          <option value="1">1</option>
+          <option value="0.99">0.99</option>
+          <option value="0.97">0.97</option>
+          <option value="0.95">0.95</option>
+        </select></div>
+      <div class="modal-actions"><button class="btn-secondary" onclick="cancelFwindModal()">Cancel</button><button
+          class="btn-primary" onclick="saveFwindModal()">Apply</button></div>
+    </div>
+  </div>
+  <div class="modal-overlay" id="posModal">
+    <div class="modal-card" style="width:min(560px,100%);">
+      <h3>PoS / PoC Inputs</h3>
+      <div class="sub" id="posModalFuelName" style="margin-bottom:16px;">Enter LCV, E value and (for e-fuels) eu value
+        for the selected fuel.</div>
+      <div class="field" style="margin-bottom:12px;"><label>LCV option</label><select id="modalLcvMode">
+          <option value="base">No change in LCV (use master value)</option>
+          <option value="custom">Custom LCV</option>
+        </select></div>
+      <div class="field" style="margin-bottom:12px;"><label>Master LCV from fuel table</label><input id="modalBaseLcv"
+          readonly></div>
+      <div class="field" style="margin-bottom:12px;"><label>LCV MJ/g</label><input id="modalCustomLcv" type="number"
+          step="0.0001"></div>
+      <div class="field" style="margin-bottom:12px;"><label>E option</label><select id="modalEMode">
+          <option value="base">No change in E (use standard value)</option>
+          <option value="custom">Custom E value</option>
+        </select></div>
+      <div class="field" style="margin-bottom:12px;"><label>Standard E from fuel table</label><input id="modalBaseE"
+          readonly></div>
+      <div class="field" style="margin-bottom:12px;"><label>E value gCO2eq/MJ</label><input id="modalCustomE"
+          type="number" step="0.0001"></div>
+      <div id="euFields" class="eu-fields">
+        <div class="field" style="margin-bottom:12px;"><label>eu option</label><select id="modalEuMode">
+            <option value="base">No change in eu (use standard value)</option>
+            <option value="custom">Custom eu</option>
+          </select></div>
+        <div class="field" style="margin-bottom:12px;"><label>Standard eu from fuel table</label><input id="modalBaseEu"
+            readonly></div>
+        <div class="field" style="margin-bottom:12px;"><label>eu value gCO2eq/MJ</label><input id="modalCustomEu"
+            type="number" step="0.0001"></div>
+      </div>
+      <div class="modal-actions"><button class="btn-secondary" onclick="cancelPosModal()">Cancel</button><button
+          class="btn-primary" onclick="savePosModal()">Apply</button></div>
+    </div>
+  </div>
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal-card">
+      <h3>Detailed Result</h3>
+      <div class="mini" style="margin-bottom:14px;">Aggregated by pathway / consumer from the fuels selected in Part B.
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="min-width:260px;">Pathway name / Consumer</th>
+              <th>Energy use in scope<br><span class="mini">(in million MJs)</span></th>
+              <th>WtT GHG<br><span class="mini">(CO<sub>2</sub><sub>eqWtT</sub>)</span></th>
+              <th>TtW CO<sub>2</sub></th>
+              <th>TtW CH<sub>4</sub></th>
+              <th>TtW N<sub>2</sub>O</th>
+              <th>Slip<br><span class="mini">(C<sub>slip</sub>)</span></th>
+              <th>TtW GHG</th>
+              <th>RFNBO reward<br><span class="mini">(RWD)</span></th>
+            </tr>
+          </thead>
+          <tbody id="detailResultBody"></tbody>
+        </table>
+      </div>
+      <div class="modal-actions"><button class="btn-danger" onclick="closeDetailModal()">Close</button></div>
+    </div>
+  </div>
+
+  <div class="print-report">
+    <h3 class="print-title">FuelEU Maritime Compliance Report</h3>
+
+    <div class="print-subtitle">Part A · Data identifying the ship and company</div>
+    <table>
+      <tbody>
+        <tr>
+          <td class="label-cell">NAME OF SHIP</td>
+          <td class="value-cell" id="pr_shipName"></td>
+        </tr>
+        <tr>
+          <td class="label-cell">IMO NUMBER</td>
+          <td class="value-cell" id="pr_imoNumber"></td>
+        </tr>
+        <tr>
+          <td class="label-cell">REPORTING YEAR</td>
+          <td class="value-cell" id="pr_reportingYear"></td>
+        </tr>
+        <tr>
+          <td class="label-cell">REPORTING PERIOD FROM</td>
+          <td class="value-cell" id="pr_fromDate"></td>
+        </tr>
+        <tr>
+          <td class="label-cell">REPORTING PERIOD TO</td>
+          <td class="value-cell" id="pr_toDate"></td>
+        </tr>
+        <tr>
+          <td class="label-cell">TOTAL DISTANCE TRAVELLED (NM)</td>
+          <td class="value-cell" id="pr_totalDistance"></td>
+        </tr>
+        <tr>
+          <td class="label-cell">TIME SPENT AT SEA (HOURS)</td>
+          <td class="value-cell" id="pr_timeSea"></td>
+        </tr>
+        <tr>
+          <td class="label-cell">TIME AT ANCHORAGE (HOURS)</td>
+          <td class="value-cell" id="pr_timeAnchorage"></td>
+        </tr>
+        <tr>
+          <td class="label-cell">TOTAL NUMBER OF FUELS</td>
+          <td class="value-cell" id="pr_fuelCount"></td>
+        </tr>
+        <tr>
+          <td class="label-cell">WIND-ASSISTED PROPULSION (APPLICABLE)</td>
+          <td class="value-cell" id="pr_windApplicable"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="print-subtitle">Part B · GHG intensity calculation by fuel</div>
+    <table>
+      <thead>
+        <tr>
+          <th>PATHWAY NAME / CONSUMER</th>
+          <th>POS/POC AVAILABLE</th>
+          <th>ACTIVE LCV<br>MJ/G</th>
+          <th>ACTIVE E VALUE<br>GCO2EQ/MJ</th>
+          <th>100% COVERED<br>TONNES</th>
+          <th>50% COVERED<br>TONNES</th>
+        </tr>
+      </thead>
+      <tbody id="pr_partBBody"></tbody>
+    </table>
+
+    <div class="print-subtitle">Part C · Compliance balance and penalty calculations</div>
+    <table>
+      <tbody>
+        <tr>
+          <td class="label-cell">SHOW DETAILED RESULT</td>
+          <td class="value-cell" id="pr_detailToggle"></td>
+        </tr>
+        <tr>
+          <td class="label-cell">SELECTED FWIND</td>
+          <td class="value-cell" id="pr_fwind"></td>
+        </tr>
+        <tr>
+          <td class="label-cell">REDUCTION BAND</td>
+          <td class="value-cell" id="pr_reductionBand"></td>
+        </tr>
+        <tr>
+          <td class="label-cell">REPORTING PERIOD SUMMARY</td>
+          <td class="value-cell" id="pr_periodSummary"></td>
+        </tr>
+        <tr>
+          <td class="label-cell">
+            <div class="metric-title">Total GHG Intensity</div>
+            <div class="metric-note">Actual = Weighted WtT + Weighted TtW, adjusted by fwind only if wind is enabled.
+            </div>
+          </td>
+          <td class="value-cell" id="pr_heroActual"></td>
+        </tr>
+        <tr>
+          <td class="label-cell">
+            <div class="metric-title">Current Target</div>
+            <div class="metric-note">Reference value 91.16 gCO2eq/MJ reduced by FuelEU year band.</div>
+          </td>
+          <td class="value-cell" id="pr_heroTarget"></td>
+        </tr>
+        <tr>
+          <td class="label-cell">
+            <div class="metric-title">Compliance Balance</div>
+            <div class="metric-note">Displayed in tCO2eq.</div>
+          </td>
+          <td class="value-cell" id="pr_heroBalance"></td>
+        </tr>
+        <tr>
+          <td class="label-cell">
+            <div class="metric-title">Status</div>
+            <div class="metric-note" id="pr_penaltyNote"></div>
+          </td>
+          <td class="value-cell" id="pr_heroStatus"></td>
+        </tr>
+        <tr>
+          <td class="label-cell">
+            <div class="metric-title">TOTAL ENERGY IN SCOPE</div>
+            <div class="metric-note">MJ</div>
+          </td>
+          <td class="value-cell" id="pr_totalEnergy"></td>
+        </tr>
+        <tr>
+          <td class="label-cell">
+            <div class="metric-title">WEIGHTED WTT</div>
+            <div class="metric-note">Σ(WtT × energy) / Σ(energy × reward)</div>
+          </td>
+          <td class="value-cell" id="pr_weightedWtt"></td>
+        </tr>
+        <tr>
+          <td class="label-cell">
+            <div class="metric-title">WEIGHTED TTW</div>
+            <div class="metric-note">Σ(TtW × energy) / Σ(energy × reward)</div>
+          </td>
+          <td class="value-cell" id="pr_weightedTtw"></td>
+        </tr>
+        <tr>
+          <td class="label-cell">
+            <div class="metric-title">FUELEU PENALTY</div>
+            <div class="metric-note">Only calculated when balance is negative</div>
+          </td>
+          <td class="value-cell" id="pr_penalty"></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="print-subtitle">Detailed Result</div>
+    <table class="wide-table">
+      <thead>
+        <tr>
+          <th>PATHWAY NAME / CONSUMER</th>
+          <th>ENERGY USE IN SCOPE<br>(IN MILLION MJS)</th>
+          <th>WTT GHG<br>(CO2EQWTT)</th>
+          <th>TTW CO2</th>
+          <th>TTW CH4</th>
+          <th>TTW N2O</th>
+          <th>SLIP<br>(CSLIP)</th>
+          <th>TTW GHG</th>
+          <th>RFNBO REWARD<br>(RWD)</th>
+        </tr>
+      </thead>
+      <tbody id="pr_partCDetailBody"></tbody>
+    </table>
+
+    <div class="print-subtitle">Part D · Long-Term Compliance Outlook</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Year</th>
+          <th>Reduction (%)</th>
+          <th>Required GHG (gCO2eq/MJ)</th>
+          <th>Compliance Balance</th>
+          <th>Penalty</th>
+        </tr>
+      </thead>
+      <tbody id="pr_partDBody"></tbody>
+    </table>
+
+    <div class="print-graph-card">
+      <div class="print-graph-title">FuelEU Penalty Projection Graph</div>
+      <div class="print-graph-note">Penalty trend by reporting milestone year</div>
+      <svg id="pr_penaltyGraph" class="print-graph-svg" viewBox="0 0 980 360" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+  </div>
+  <script>
+    const FUELS = [{ "name": "HFO (Grades RME to RMK)", "lcv": 0.0405, "wtt": 13.5, "cfCO2": 3.114, "cfCH4": 5e-05, "cfN2O": 0.00018, "cslip": 0, "reward": 1 }, { "name": "LFO (Grades RMA to RMD)", "lcv": 0.041, "wtt": 13.2, "cfCO2": 3.151, "cfCH4": 5e-05, "cfN2O": 0.00018, "cslip": 0, "reward": 1 }, { "name": "MDO MGO (Grades DMX to DMB)", "lcv": 0.0427, "wtt": 14.4, "cfCO2": 3.206, "cfCH4": 5e-05, "cfN2O": 0.00018, "cslip": 0, "reward": 1 }, { "name": "LNG / LNG Otto (dual fuel medium speed)", "lcv": 0.0491, "wtt": 18.5, "cfCO2": 2.75, "cfCH4": 0.0, "cfN2O": 0.00011, "cslip": 3.1, "reward": 1 }, { "name": "LNG / LNG Otto (dual fuel slow speed)", "lcv": 0.0491, "wtt": 18.5, "cfCO2": 2.75, "cfCH4": 0.0, "cfN2O": 0.00011, "cslip": 1.7, "reward": 1 }, { "name": "LNG / LNG Diesel (dual fuel slow speed)", "lcv": 0.0491, "wtt": 18.5, "cfCO2": 2.75, "cfCH4": 0.0, "cfN2O": 0.00011, "cslip": 0.2, "reward": 1 }, { "name": "LNG / LBSI", "lcv": 0.0491, "wtt": 18.5, "cfCO2": 2.75, "cfCH4": 0.0, "cfN2O": 0.00011, "cslip": 2.6, "reward": 1 }, { "name": "Ethane", "lcv": 0.0464, "wtt": 18.5, "cfCO2": 2.927, "cfCH4": 5e-05, "cfN2O": 0.00018, "cslip": 0, "reward": 1 }, { "name": "LPG - Butane", "lcv": 0.046, "wtt": 7.8, "cfCO2": 3.03, "cfCH4": 5e-05, "cfN2O": 0.00018, "cslip": 0, "reward": 1 }, { "name": "LPG - Propane", "lcv": 0.046, "wtt": 7.8, "cfCO2": 3.0, "cfCH4": 5e-05, "cfN2O": 0.00018, "cslip": 0, "reward": 1 }, { "name": "H2 (natural gas) / Fuel Cells", "lcv": 0.12, "wtt": 132.0, "cfCO2": 0.0, "cfCH4": 0.0, "cfN2O": 0.0, "cslip": 0, "reward": 1 }, { "name": "H2 (natural gas) / ICE", "lcv": 0.12, "wtt": 132.0, "cfCO2": 0.0, "cfCH4": 0.0, "cfN2O": 0.00018, "cslip": 0, "reward": 1 }, { "name": "NH3 (natural gas) / Fuel Cells", "lcv": 0.0186, "wtt": 121.0, "cfCO2": 0.0, "cfCH4": 5e-05, "cfN2O": 0.00018, "cslip": 0, "reward": 1 }, { "name": "NH3 (natural gas) / ICE", "lcv": 0.018, "wtt": 121.0, "cfCO2": 0.0, "cfCH4": 5e-05, "cfN2O": 0.00018, "cslip": 0, "reward": 1 }, { "name": "Methanol (natural gas)", "lcv": 0.0199, "wtt": 31.3, "cfCO2": 1.375, "cfCH4": 5e-05, "cfN2O": 0.00018, "cslip": 0, "reward": 1 }, { "name": "Bio-ethanol (wheat straw)", "lcv": 0.027, "wtt": -55.15185, "cfCO2": 1.913, "cfCH4": 5e-05, "cfN2O": 0.00018, "cslip": 0, "reward": 1 }, { "name": "Bio-diesel (waste cooking oil)", "lcv": 0.037, "wtt": -61.69459, "cfCO2": 2.834, "cfCH4": 5e-05, "cfN2O": 0.00018, "cslip": 0, "reward": 1 }, { "name": "Hydrotreated Vegetable Oil (waste cooking oil)", "lcv": 0.044, "wtt": -54.79545, "cfCO2": 3.115, "cfCH4": 5e-05, "cfN2O": 0.00018, "cslip": 0, "reward": 1 }, { "name": "Liquefied Biomethane (bio-waste) / Otto (dual fuel medium speed)", "lcv": 0.05, "wtt": -35.83, "cfCO2": 2.75, "cfCH4": 0.0, "cfN2O": 0.00011, "cslip": 3.1, "reward": 1 }, { "name": "Liquefied Biomethane / Otto (dual fuel slow speed)", "lcv": 0.05, "wtt": -35.83, "cfCO2": 2.75, "cfCH4": 0.0, "cfN2O": 0.00011, "cslip": 1.7, "reward": 1 }, { "name": "Liquefied Biomethane / Diesel (dual fuels)", "lcv": 0.05, "wtt": -35.83, "cfCO2": 2.75, "cfCH4": 0.0, "cfN2O": 0.00011, "cslip": 0.2, "reward": 1 }, { "name": "Liquefied Biomethane / LBSI", "lcv": 0.05, "wtt": -35.83, "cfCO2": 2.75, "cfCH4": 0.0, "cfN2O": 0.00011, "cslip": 2.6, "reward": 1 }, { "name": "Bio-methanol", "lcv": 0.02, "wtt": -58.35, "cfCO2": 1.375, "cfCH4": 5e-05, "cfN2O": 0.00018, "cslip": 0, "reward": 1 }, { "name": "Other Production Pathways", "lcv": 0.037, "wtt": -69.18919, "cfCO2": 3.115, "cfCH4": 5e-05, "cfN2O": 0.00018, "cslip": 0, "reward": 1 }, { "name": "e-diesel", "lcv": 0.0427, "e": 10.0, "eu": 73.2, "wtt": -63.2, "cfCO2": 3.206, "cfCH4": 5e-05, "cfN2O": 0.00018, "cslip": 0.0, "reward": 2 }, { "name": "e-methanol", "lcv": 0.0199, "e": 10.0, "eu": 68.9, "wtt": -58.9, "cfCO2": 1.375, "cfCH4": 5e-05, "cfN2O": 0.00018, "cslip": 0.0, "reward": 2 }, { "name": "e-LNG / Otto (dual fuel medium speed)", "lcv": 0.0491, "e": 10.0, "eu": 56.2, "wtt": -46.2, "cfCO2": 2.75, "cfCH4": 0.0, "cfN2O": 0.00011, "cslip": 3.1, "reward": 2 }, { "name": "e-LNG / Otto (dual fuel slow speed)", "lcv": 0.0491, "e": 10.0, "eu": 56.2, "wtt": -46.2, "cfCO2": 2.75, "cfCH4": 0.0, "cfN2O": 0.00011, "cslip": 1.7, "reward": 2 }, { "name": "e-LNG / Diesel (dual fuel slow speed)", "lcv": 0.0491, "e": 10.0, "eu": 56.2, "wtt": -46.2, "cfCO2": 2.75, "cfCH4": 0.0, "cfN2O": 0.00011, "cslip": 0.2, "reward": 2 }, { "name": "e-LNG / LBSI", "lcv": 0.0491, "e": 10.0, "eu": 56.2, "wtt": -46.2, "cfCO2": 2.75, "cfCH4": 0.0, "cfN2O": 0.00011, "cslip": 2.6, "reward": 2 }, { "name": "e-H2 / Fuel Cells", "lcv": 0.12, "e": 10.0, "eu": 0.0, "wtt": 10.0, "cfCO2": 0.0, "cfCH4": 0.0, "cfN2O": 0.0, "cslip": 0.0, "reward": 2 }, { "name": "e-H2 / ICE", "lcv": 0.12, "e": 10.0, "eu": 0.0, "wtt": 10.0, "cfCO2": 0.0, "cfCH4": 0.0, "cfN2O": 0.00018, "cslip": 0.0, "reward": 2 }, { "name": "e-NH3 / Fuel Cells", "lcv": 0.0186, "e": 10.0, "eu": 0.0, "wtt": 10.0, "cfCO2": 0.0, "cfCH4": 5e-05, "cfN2O": 0.00018, "cslip": 0.0, "reward": 2 }, { "name": "e-NH3 / ICE", "lcv": 0.0186, "e": 10.0, "eu": 0.0, "wtt": 10.0, "cfCO2": 0.0, "cfCH4": 5e-05, "cfN2O": 0.00018, "cslip": 0.0, "reward": 2 }];
+    const fuelMap = Object.fromEntries(FUELS.map(f => [f.name, f]));
+    const REFERENCE_GHG = 91.16, GWP_CH4 = 25, GWP_N2O = 298;
+    const targetBands = [{ start: 2025, end: 2029, reduction: 0.02 }, { start: 2030, end: 2034, reduction: 0.06 }, { start: 2035, end: 2039, reduction: 0.145 }, { start: 2040, end: 2044, reduction: 0.31 }, { start: 2045, end: 2049, reduction: 0.62 }, { start: 2050, end: 2055, reduction: 0.80 }];
+    let hasCalculated = false, selectedFwind = 1, previousWindValue = 'NO', currentPosRowIndex = null, penaltyChartInstance = null;
+    const fmt = (n, d = 4) => Number.isFinite(n) ? Number(n).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d }) : '0';
+    const fmt0 = n => Number.isFinite(n) ? Math.round(n).toLocaleString() : '0';
+    const fmtBalanceT = n => Number.isFinite(n) ? Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' tCO2eq' : '0.00 tCO2eq';
+    const fmtMoney = n => Number.isFinite(n) ? 'EUR ' + Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 'EUR NA';
+    const fmtEuro = n => Number.isFinite(n) ? '€' + Math.round(n).toLocaleString() : '€0';
+    function getTargetForYear(year) { const y = Number(year); const b = targetBands.find(x => y >= x.start && y <= x.end) || targetBands[targetBands.length - 1]; return { target: REFERENCE_GHG * (1 - b.reduction), label: `${b.start}${b.end >= 2050 ? ' onwards' : `-${b.end}`} · -${(b.reduction * 100).toFixed(b.reduction === 0.145 ? 1 : 0)}%` }; }
+    function esc(str) { return String(str).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;'); }
+    function buildFuelOptions(selected = '') { return '<option value="">Select fuel pathway</option>' + FUELS.map(f => `<option value="${esc(f.name)}" ${selected === f.name ? 'selected' : ''}>${esc(f.name)}</option>`).join(''); }
+    function isAltEuFuel(fuel) { return !!(fuel && Object.prototype.hasOwnProperty.call(fuel, 'eu')); }
+    function updateWindDisplay() { const w = document.getElementById('windApplicable').value; document.getElementById('fwind').value = w === 'YES' ? selectedFwind.toFixed(2) : '1.00'; const windRuleEl = document.getElementById('windRule'); if (windRuleEl) windRuleEl.value = w === 'YES' ? 'YES → Actual = (WtT + TtW) × fwind' : 'NO → Actual = WtT + TtW'; const actualFormulaEl = document.getElementById('actualFormula'); if (actualFormulaEl) actualFormulaEl.value = w === 'YES' ? 'GHGIEactual = (WtT + TtW) × fwind' : 'GHGIEactual = WtT + TtW'; }
+    function getActualMultiplier() { return document.getElementById('windApplicable').value === 'YES' ? selectedFwind : 1; }
+    function updatePeriodSummary() { const f = document.getElementById('fromDate').value, t = document.getElementById('toDate').value; document.getElementById('periodSummary').value = (f || t) ? `${f || '—'} to ${t || '—'}` : 'Select From and To dates'; }
+    function closeAllModals() { document.getElementById('fwindModal').classList.remove('active'); document.getElementById('posModal').classList.remove('active'); document.getElementById('detailModal').classList.remove('active'); currentPosRowIndex = null; }
+    function openFwindModal() { document.getElementById('modalFwindSelect').value = String(selectedFwind); document.getElementById('fwindModal').classList.add('active'); }
+    function cancelFwindModal() { document.getElementById('windApplicable').value = previousWindValue || 'NO'; if (document.getElementById('windApplicable').value !== 'YES') { selectedFwind = 1; updateWindDisplay(); } document.getElementById('fwindModal').classList.remove('active'); recalculateAll(); }
+    function saveFwindModal() { selectedFwind = Number(document.getElementById('modalFwindSelect').value) || 1; document.getElementById('fwindModal').classList.remove('active'); recalculateAll(); }
+    function openPosModal(rowIndex) {
+      currentPosRowIndex = rowIndex; const tr = document.querySelectorAll('#fuelRows tr')[rowIndex]; if (!tr) return; const fuel = fuelMap[tr.querySelector('.fuel-select').value]; document.getElementById('posModalFuelName').textContent = 'PoS / PoC inputs for: ' + (tr.querySelector('.fuel-select').value || 'Selected fuel'); document.getElementById('modalBaseLcv').value = (Number(tr.dataset.baseLcv) || 0).toFixed(4); document.getElementById('modalLcvMode').value = tr.dataset.lcvMode || 'base'; document.getElementById('modalCustomLcv').value = tr.dataset.customLcv || '';
+      const euContainer = document.getElementById('euFields');
+      const isEfuel = isAltEuFuel(fuel);
+      if (isEfuel) {
+        document.getElementById('modalBaseE').value = (Number(tr.dataset.baseE) || 0).toFixed(4);
+        document.getElementById('modalEMode').value = tr.dataset.eMode || 'base';
+        document.getElementById('modalCustomE').value = tr.dataset.customE || '';
+        euContainer.style.display = 'block';
+        document.getElementById('modalBaseEu').value = (Number(tr.dataset.baseEu) || 0).toFixed(4);
+        document.getElementById('modalEuMode').value = tr.dataset.euMode || 'base';
+        document.getElementById('modalCustomEu').value = tr.dataset.customEu || '';
+      } else {
+        document.getElementById('modalBaseE').value = '';
+        document.getElementById('modalEMode').value = 'base';
+        document.getElementById('modalCustomE').value = '';
+        euContainer.style.display = 'none';
+        document.getElementById('modalBaseEu').value = '';
+        document.getElementById('modalEuMode').value = 'base';
+        document.getElementById('modalCustomEu').value = '';
+      }
+      updatePosModalFields(); document.getElementById('posModal').classList.add('active');
+    }
+    function updatePosModalFields() {
+      document.getElementById('modalCustomLcv').disabled = document.getElementById('modalLcvMode').value !== 'custom';
+      const eModeEl = document.getElementById('modalEMode');
+      const customEEl = document.getElementById('modalCustomE');
+      if (eModeEl && customEEl) { customEEl.disabled = eModeEl.value !== 'custom'; }
+      document.getElementById('modalCustomEu').disabled = document.getElementById('modalEuMode').value !== 'custom';
+    }
+    function cancelPosModal() { if (currentPosRowIndex !== null) { const tr = document.querySelectorAll('#fuelRows tr')[currentPosRowIndex]; if (tr && !(tr.dataset.eMode === 'custom' || tr.dataset.customE || tr.dataset.customLcv || tr.dataset.lcvMode === 'custom' || tr.dataset.customEu || tr.dataset.euMode === 'custom')) tr.querySelector('.pospoc').value = 'NO'; } document.getElementById('posModal').classList.remove('active'); recalculateAll(); }
+    function savePosModal() {
+      markPartBDirty(); if (currentPosRowIndex === null) return; const tr = document.querySelectorAll('#fuelRows tr')[currentPosRowIndex]; if (!tr) return; const fuel = fuelMap[tr.querySelector('.fuel-select').value]; const mode = document.getElementById('modalLcvMode').value; tr.dataset.lcvMode = mode; tr.dataset.customLcv = mode === 'custom' ? document.getElementById('modalCustomLcv').value : '';
+      if (isAltEuFuel(fuel)) {
+        const eMode = document.getElementById('modalEMode').value;
+        tr.dataset.eMode = eMode;
+        tr.dataset.customE = eMode === 'custom' ? document.getElementById('modalCustomE').value : '';
+        const euMode = document.getElementById('modalEuMode').value;
+        tr.dataset.euMode = euMode;
+        tr.dataset.customEu = euMode === 'custom' ? document.getElementById('modalCustomEu').value : '';
+        tr.dataset.eValue = '';
+      } else {
+        tr.dataset.eMode = 'base';
+        tr.dataset.customE = '';
+        tr.dataset.eValue = document.getElementById('modalCustomE') ? (document.getElementById('modalCustomE').value || '') : '';
+        tr.dataset.euMode = 'base';
+        tr.dataset.customEu = '';
+      }
+      document.getElementById('posModal').classList.remove('active'); updateFuelRow(currentPosRowIndex);
+    }
+    function renderFuelRows(count) { markPartBDirty(); const tbody = document.getElementById('fuelRows'); const existing = [...tbody.querySelectorAll('tr')].map(tr => ({ fuel: tr.querySelector('.fuel-select')?.value || '', pos: tr.querySelector('.pospoc')?.value || 'NO', q100: tr.querySelector('.qty100')?.value || '', q50: tr.querySelector('.qty50')?.value || '', lcvMode: tr.dataset.lcvMode || 'base', customLcv: tr.dataset.customLcv || '', eMode: tr.dataset.eMode || 'base', customE: tr.dataset.customE || '', eValue: tr.dataset.eValue || '', euMode: tr.dataset.euMode || 'base', customEu: tr.dataset.customEu || '' })); tbody.innerHTML = ''; for (let i = 0; i < count; i++) { const row = existing[i] || { fuel: '', pos: 'NO', q100: '', q50: '', lcvMode: 'base', customLcv: '', eMode: 'base', customE: '', eValue: '', euMode: 'base', customEu: '' }; const tr = document.createElement('tr'); tr.dataset.lcvMode = row.lcvMode; tr.dataset.customLcv = row.customLcv; tr.dataset.eMode = row.eMode; tr.dataset.customE = row.customE; tr.dataset.eValue = row.eValue; tr.dataset.euMode = row.euMode; tr.dataset.customEu = row.customEu; tr.innerHTML = `<td><select class="fuel-select" onchange="updateFuelRow(${i}, true)">${buildFuelOptions(row.fuel)}</select></td><td><select class="pospoc" onchange="handlePosChange(${i})"><option value="NO" ${row.pos === 'NO' ? 'selected' : ''}>NO</option><option value="YES" ${row.pos === 'YES' ? 'selected' : ''}>YES</option></select></td><td><span class="readonly active-lcv">0.0000</span><div class="mini lcv-mode" style="margin-top:6px;"></div></td><td><span class="readonly active-evalue">-</span><div class="mini evalue-mode" style="margin-top:6px;"></div></td><td><input class="slip-input" type="number" readonly><div class="mini" style="margin-top:6px;">Auto from fuel table</div></td><td><div class="calc-stack"><div class="line">WtT: <b class="wtt">0.00000</b></div><div class="line">WTW: <b class="wtw">0.00000</b></div></div></td><td><div class="calc-stack"><div class="line">CO2: <b class="ttw-co2">0.00000</b></div><div class="line">CH4: <b class="ttw-ch4">0.00000</b></div><div class="line">N2O: <b class="ttw-n2o">0.00000</b></div><div class="line">Total: <b class="ttw-total">0.00000</b></div></div></td><td><input class="qty100" type="number" min="0" step="0.0001" value="${row.q100}" oninput="updateFuelRow(${i})"></td><td><input class="qty50" type="number" min="0" step="0.0001" value="${row.q50}" oninput="updateFuelRow(${i})"></td><td><span class="readonly energy">0.0000</span></td>`; tbody.appendChild(tr); updateFuelRow(i, true); } recalculateAll(); }
+    function handlePosChange(index) { markPartBDirty(); const tr = document.querySelectorAll('#fuelRows tr')[index]; if (!tr) return; if (tr.querySelector('.pospoc').value === 'YES') openPosModal(index); else { tr.dataset.lcvMode = 'base'; tr.dataset.customLcv = ''; tr.dataset.eMode = 'base'; tr.dataset.customE = ''; tr.dataset.eValue = ''; tr.dataset.euMode = 'base'; tr.dataset.customEu = ''; updateFuelRow(index); } }
+    function updateFuelRow(index, resetBaseOnFuelChange = false) {
+      markPartBDirty(); const tr = document.querySelectorAll('#fuelRows tr')[index]; if (!tr) return; const fuelName = tr.querySelector('.fuel-select').value; const fuel = fuelMap[fuelName]; const pos = tr.querySelector('.pospoc').value; const slipInput = tr.querySelector('.slip-input'); if (fuel) { tr.dataset.baseLcv = fuel.lcv; tr.dataset.baseE = Object.prototype.hasOwnProperty.call(fuel, 'e') ? fuel.e : ''; tr.dataset.baseEu = isAltEuFuel(fuel) ? fuel.eu : ''; if (resetBaseOnFuelChange) { tr.dataset.lcvMode = 'base'; tr.dataset.customLcv = ''; tr.dataset.eMode = 'base'; tr.dataset.customE = ''; tr.dataset.eValue = ''; tr.dataset.euMode = 'base'; tr.dataset.customEu = ''; } slipInput.value = fuel.cslip; } else { slipInput.value = ''; tr.dataset.baseE = ''; tr.dataset.baseEu = ''; }
+      const baseLcv = fuel ? Number(fuel.lcv) : 0; const lcvMode = pos === 'YES' ? (tr.dataset.lcvMode || 'base') : 'base'; const customLcv = pos === 'YES' ? Number(tr.dataset.customLcv || 0) : 0; const activeLcv = pos === 'YES' && lcvMode === 'custom' && customLcv > 0 ? customLcv : baseLcv;
+      const isEfuel = isAltEuFuel(fuel);
+      const baseE = isEfuel ? Number(fuel.e || 0) : NaN;
+      const eMode = pos === 'YES' ? (tr.dataset.eMode || 'base') : 'base';
+      const customE = pos === 'YES' ? Number(tr.dataset.customE || 0) : 0;
+      const manualEValueText = pos === 'YES' ? (tr.dataset.eValue || '') : '';
+      const activeE = isEfuel ? (eMode === 'custom' && tr.dataset.customE !== '' && !Number.isNaN(customE) ? customE : baseE) : (manualEValueText === '' ? NaN : Number(manualEValueText));
+      tr.querySelector('.active-lcv').textContent = fmt(activeLcv, 4);
+      tr.querySelector('.active-evalue').textContent = (Number.isFinite(activeE) ? fmt(activeE, 4) : '-');
+      tr.querySelector('.lcv-mode').textContent = pos === 'YES' ? (lcvMode === 'custom' ? 'Custom LCV from popup' : 'No change in LCV (master value)') : 'Master LCV from fuel table';
+      if (isEfuel) {
+        tr.querySelector('.evalue-mode').textContent = pos === 'YES' ? (eMode === 'custom' ? 'Custom E value from popup' : 'No change in E (standard value)') : 'Standard E inactive';
+      } else {
+        tr.querySelector('.evalue-mode').textContent = pos === 'YES' ? 'E value managed from popup' : 'E value inactive';
+      }
+      const slipPct = Number(slipInput.value) || 0, slip = slipPct / 100, q100 = Number(tr.querySelector('.qty100').value) || 0, q50 = Number(tr.querySelector('.qty50').value) || 0;
+      const cfCO2 = fuel ? Number(fuel.cfCO2) : 0, cfCH4 = fuel ? Number(fuel.cfCH4) : 0, cfN2O = fuel ? Number(fuel.cfN2O) : 0, masterWtt = fuel ? Number(fuel.wtt) : 0, reward = fuel ? Number(fuel.reward || 1) : 1;
+      const ttwCO2 = activeLcv > 0 ? cfCO2 / activeLcv : 0, ttwCH4 = activeLcv > 0 ? (cfCH4 / activeLcv) * GWP_CH4 : 0, ttwN2O = activeLcv > 0 ? (cfN2O / activeLcv) * GWP_N2O : 0, ttwGHG = activeLcv > 0 ? ((1 - slip) * (ttwCO2 + ttwCH4 + ttwN2O)) + ((slip * GWP_CH4) / activeLcv) : 0;
+      let wtt = masterWtt;
+      let activeEu = null;
+      if (pos === 'YES' && isEfuel) {
+        const euMode = tr.dataset.euMode || 'base';
+        const baseEu = fuel ? Number(fuel.eu || 0) : 0;
+        const customEu = Number(tr.dataset.customEu || 0);
+        activeEu = (euMode === 'custom' && tr.dataset.customEu !== '' && !Number.isNaN(customEu)) ? customEu : baseEu;
+        wtt = (Number.isFinite(activeE) ? activeE : baseE) - activeEu;
+      } else if (pos === 'YES' && manualEValueText !== '' && !Number.isNaN(Number(manualEValueText))) {
+        wtt = Number(manualEValueText) - ttwCO2;
+      }
+      const wtw = wtt + ttwGHG; const energyMilMj = (q100 * activeLcv) + (q50 * activeLcv * 0.5);
+      tr.querySelector('.wtt').textContent = fmt(wtt, 5); tr.querySelector('.wtw').textContent = fmt(wtw, 5); tr.querySelector('.ttw-co2').textContent = fmt(ttwCO2, 5); tr.querySelector('.ttw-ch4').textContent = fmt(ttwCH4, 5); tr.querySelector('.ttw-n2o').textContent = fmt(ttwN2O, 5); tr.querySelector('.ttw-total').textContent = fmt(ttwGHG, 5); tr.querySelector('.energy').textContent = fmt(energyMilMj, 4);
+      tr.dataset.fuelName = fuelName || ''; tr.dataset.energyMilMj = String(energyMilMj); tr.dataset.energyMj = String(energyMilMj * 1000000); tr.dataset.rewardedEnergyMj = String(energyMilMj * 1000000 * reward); tr.dataset.wtt = String(wtt); tr.dataset.ttwCO2 = String(ttwCO2); tr.dataset.ttwCH4 = String(ttwCH4); tr.dataset.ttwN2O = String(ttwN2O); tr.dataset.ttw = String(ttwGHG); tr.dataset.slipPct = String(slipPct); tr.dataset.reward = String(reward); tr.dataset.activeEu = activeEu === null ? '' : String(activeEu); tr.dataset.activeE = Number.isFinite(activeE) ? String(activeE) : ''; recalculateAll();
+    }
+    // NEW: Do NOT aggregate by fuel name.
+    // Each Part B row appears separately in Detailed Result, even if fuel type is same.
+    function buildDetailAggregates() {
+      const rows = [...document.querySelectorAll('#fuelRows tr')];
+      return rows.map((tr, idx) => ({
+        fuelName: tr.dataset.fuelName || tr.querySelector('.fuel-select')?.value || ('Fuel row ' + (idx + 1)),
+        energyMilMj: Number(tr.dataset.energyMilMj || 0),
+        wtt: Number(tr.dataset.wtt || 0),
+        ttwCO2: Number(tr.dataset.ttwCO2 || 0),
+        ttwCH4: Number(tr.dataset.ttwCH4 || 0),
+        ttwN2O: Number(tr.dataset.ttwN2O || 0),
+        slipPct: Number(tr.dataset.slipPct || 0),
+        ttw: Number(tr.dataset.ttw || 0),
+        reward: Number(tr.dataset.reward || 0)
+      })).filter(r => r.fuelName);
+    }
+    function renderDetailResultTable() { const body = document.getElementById('detailResultBody'); if (!body) return; body.innerHTML = ''; const rows = buildDetailAggregates(); if (rows.length === 0) { const tr = document.createElement('tr'); tr.innerHTML = '<td colspan="9" class="mini">No Part B fuel rows selected yet.</td>'; body.appendChild(tr); return; } rows.forEach(r => { const tr = document.createElement('tr'); tr.innerHTML = `<td>${esc(r.fuelName)}</td><td>${fmt(r.energyMilMj, 4)}</td><td>${fmt(r.wtt, 5)}</td><td>${fmt(r.ttwCO2, 5)}</td><td>${fmt(r.ttwCH4, 5)}</td><td>${fmt(r.ttwN2O, 5)}</td><td>${fmt(r.slipPct, 2)}</td><td>${fmt(r.ttw, 5)}</td><td>${fmt(r.reward, 2)}</td>`; body.appendChild(tr); }); }
+    function openDetailModal() { renderDetailResultTable(); document.getElementById('detailModal').classList.add('active'); }
+    function closeDetailModal() { document.getElementById('detailModal').classList.remove('active'); document.getElementById('detailResultToggle').value = 'NO'; }
+    function buildYearResults(actual, totalEnergyMJ) { const outlookBands = [{ year: 2020, reduction: 0.00 }, { year: 2025, reduction: 0.02 }, { year: 2030, reduction: 0.06 }, { year: 2035, reduction: 0.145 }, { year: 2040, reduction: 0.31 }, { year: 2045, reduction: 0.62 }, { year: 2050, reduction: 0.80 }]; return outlookBands.map(b => { const required = REFERENCE_GHG * (1 - b.reduction); const balanceG = (required - actual) * totalEnergyMJ; const balanceT = balanceG / 1000000; const penaltyNum = (balanceG < 0 && actual > 0) ? (Math.abs(balanceG) / (actual * 41000)) * 2400 : 0; return { year: b.year, reduction: b.reduction * 100, required, balanceT, penaltyNum }; }); }
+    function renderYearTable(rows) { const body = document.getElementById('yearResultsBody'); body.innerHTML = ''; rows.forEach(r => { const tr = document.createElement('tr'); const balanceClass = r.balanceT >= 0 ? 'partd-positive' : 'partd-negative'; const penaltyClass = r.penaltyNum > 0 ? 'partd-negative' : ''; tr.innerHTML = `<td>${r.year}</td><td>${fmt(r.reduction, 2)}</td><td>${fmt(r.required, 2)}</td><td class="${balanceClass}">${r.balanceT >= 0 ? fmt(r.balanceT, 2) : '-' + fmt(Math.abs(r.balanceT), 2)}</td><td class="${penaltyClass}">${r.penaltyNum > 0 ? fmtEuro(r.penaltyNum) : '€0'}</td>`; body.appendChild(tr); }); }
+    function renderPenaltyChart(rows) {
+      const canvas = document.getElementById('penaltyChart');
+      if (!canvas || typeof Chart === 'undefined') return;
+      const ctx = canvas.getContext('2d');
+      if (penaltyChartInstance) { penaltyChartInstance.destroy(); }
+
+      const values = rows.map(r => Math.round(r.penaltyNum || 0));
+      const labels = rows.map(r => String(r.year));
+      const maxVal = Math.max(...values, 1);
+
+      const barGradient = ctx.createLinearGradient(0, 0, 0, 420);
+      barGradient.addColorStop(0, 'rgba(0,245,255,.95)');
+      barGradient.addColorStop(.45, 'rgba(0,180,255,.92)');
+      barGradient.addColorStop(1, 'rgba(0,97,255,.78)');
+
+      const lineGradient = ctx.createLinearGradient(0, 0, 420, 0);
+      lineGradient.addColorStop(0, 'rgba(112,255,184,.95)');
+      lineGradient.addColorStop(1, 'rgba(0,245,255,.95)');
+
+      const hoverGuidePlugin = {
+        id: 'hoverGuidePlugin',
+        afterDatasetsDraw(chart) {
+          const active = chart.tooltip?.getActiveElements ? chart.tooltip.getActiveElements() : (chart._active || []);
+          if (!active || !active.length) return;
+          const { ctx, chartArea: { top, bottom, left, right } } = chart;
+          const element = active[0].element;
+          const xPos = element.x;
+          const yPos = element.y;
+          const datasetIndex = active[0].datasetIndex;
+          const pointVal = Number(chart.data.datasets[datasetIndex].data[active[0].index] || 0);
+          ctx.save();
+          ctx.setLineDash([5, 5]);
+          ctx.lineWidth = 1;
+          ctx.strokeStyle = 'rgba(255,255,255,.22)';
+          ctx.beginPath(); ctx.moveTo(xPos, top); ctx.lineTo(xPos, bottom); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(left, yPos); ctx.lineTo(right, yPos); ctx.stroke();
+          ctx.setLineDash([]);
+          const label = '€' + pointVal.toLocaleString();
+          ctx.font = '700 12px Inter, Segoe UI, Arial';
+          const padX = 10, bubbleW = ctx.measureText(label).width + padX * 2, bubbleH = 28;
+          let bubbleX = xPos - bubbleW / 2;
+          bubbleX = Math.max(left + 6, Math.min(right - bubbleW - 6, bubbleX));
+          let bubbleY = yPos - bubbleH - 12;
+          if (bubbleY < top + 4) bubbleY = yPos + 12;
+          ctx.fillStyle = 'rgba(8,21,36,.96)';
+          ctx.strokeStyle = 'rgba(51,214,255,.55)';
+          ctx.lineWidth = 1;
+          const r = 10;
+          ctx.beginPath();
+          ctx.moveTo(bubbleX + r, bubbleY);
+          ctx.arcTo(bubbleX + bubbleW, bubbleY, bubbleX + bubbleW, bubbleY + bubbleH, r);
+          ctx.arcTo(bubbleX + bubbleW, bubbleY + bubbleH, bubbleX, bubbleY + bubbleH, r);
+          ctx.arcTo(bubbleX, bubbleY + bubbleH, bubbleX, bubbleY, r);
+          ctx.arcTo(bubbleX, bubbleY, bubbleX + bubbleW, bubbleY, r);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          ctx.fillStyle = '#f4fbff';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(label, bubbleX + bubbleW / 2, bubbleY + bubbleH / 2 + .5);
+          ctx.restore();
+        }
+      };
+
+      const valueLabelPenalty = {
+        id: 'valueLabelPenalty',
+        afterDatasetsDraw(chart) {
+          const { ctx } = chart;
+          const meta = chart.getDatasetMeta(0);
+          ctx.save();
+          ctx.font = '700 11px Inter, Segoe UI, Arial';
+          ctx.fillStyle = '#eaf5ff';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          values.forEach((val, i) => {
+            const el = meta.data[i];
+            if (!el) return;
+            ctx.fillText('€' + Number(val).toLocaleString(), el.x, el.y - 8);
+          });
+          ctx.restore();
+        }
+      };
+
+      penaltyChartInstance = new Chart(ctx, {
+        data: {
+          labels,
+          datasets: [
+            {
+              type: 'bar',
+              label: 'Penalty (€)',
+              data: values,
+              backgroundColor: barGradient,
+              hoverBackgroundColor: 'rgba(0,255,195,.95)',
+              borderColor: 'rgba(255,255,255,.12)',
+              borderWidth: 1,
+              borderRadius: 12,
+              borderSkipped: false,
+              barPercentage: .58,
+              categoryPercentage: .72,
+              maxBarThickness: 42,
+              minBarLength: 6,
+              order: 2
+            },
+            {
+              type: 'line',
+              label: 'Trend',
+              data: values,
+              tension: .35,
+              borderColor: lineGradient,
+              backgroundColor: 'rgba(112,255,184,.12)',
+              borderWidth: 2,
+              pointRadius: 4,
+              pointHoverRadius: 5,
+              pointBackgroundColor: '#b8fff1',
+              pointBorderColor: '#06203a',
+              pointBorderWidth: 2,
+              fill: false,
+              order: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          hover: { mode: 'index', intersect: false },
+          animation: { duration: 900, easing: 'easeOutQuart' },
+          plugins: {
+            legend: {
+              display: true,
+              labels: { color: '#d8ecff', usePointStyle: true, pointStyle: 'circle', boxWidth: 10 }
+            },
+            tooltip: {
+              enabled: true,
+              backgroundColor: 'rgba(8,21,36,.96)',
+              titleColor: '#9fe8ff',
+              bodyColor: '#ffffff',
+              borderColor: 'rgba(51,214,255,.45)',
+              borderWidth: 1,
+              padding: 12,
+              displayColors: false,
+              callbacks: {
+                title: (items) => 'Year ' + (items[0]?.label || ''),
+                label: (context) => 'Penalty: €' + Number(context.parsed.y ?? context.raw ?? 0).toLocaleString()
+              }
+            }
+          },
+          scales: {
+            x: { title: { display: true, text: 'Years', color: '#d8ecff', font: { size: 12, weight: '700' }, padding: { top: 10 } }, grid: { display: false, drawBorder: true, borderColor: 'rgba(255,255,255,.18)' }, ticks: { color: '#d8ecff', font: { size: 12, weight: '700' } }, border: { color: 'rgba(255,255,255,.18)' } },
+            y: {
+              beginAtZero: true,
+              suggestedMax: maxVal * 1.18,
+              grid: { color: 'rgba(255,255,255,.10)', drawBorder: true },
+              ticks: { color: '#d8ecff', padding: 8, callback: (value) => '€' + Number(value).toLocaleString() },
+              border: { color: 'rgba(255,255,255,.18)' }
+            }
+          }
+        },
+        plugins: [hoverGuidePlugin, valueLabelPenalty]
+      });
+    }
+
+
+    function clearCalcError() {
+      const box = document.getElementById('calcValidationError');
+      if (!box) return;
+      box.classList.remove('show');
+      box.innerHTML = '';
+    }
+    function showCalcError(messages) {
+      const box = document.getElementById('calcValidationError');
+      if (!box) return;
+      box.innerHTML = '<b>Please fill all required Part B fields before calculating:</b><br>' + messages.map(m => '• ' + esc(m)).join('<br>');
+      box.classList.add('show');
+    }
+    function markPartBDirty() {
+      hasCalculated = false;
+      hidePartCD();
+      clearCalcError();
+    }
+    function validateBeforeCalculate() {
+      const messages = [];
+      document.querySelectorAll('#fuelRows tr').forEach((tr, idx) => {
+        const rowNo = idx + 1;
+        const fuelName = tr.querySelector('.fuel-select')?.value || '';
+        if (!fuelName) {
+          messages.push(`Row ${rowNo} – fill PATHWAY NAME / CONSUMER`);
+          return;
+        }
+        const qty100El = tr.querySelector('.qty100');
+        const qty50El = tr.querySelector('.qty50');
+        const qty100Val = qty100El ? Number(qty100El.value) : NaN;
+        const qty50Val = qty50El ? Number(qty50El.value) : NaN;
+        const qty100Valid = Number.isFinite(qty100Val) && qty100Val > 0;
+        const qty50Valid = Number.isFinite(qty50Val) && qty50Val > 0;
+        if (!qty100Valid && !qty50Valid) {
+          messages.push(`Row ${rowNo} (${fuelName}) – fill either 100% covered tonnes or 50% covered tonnes with a value more than 0`);
+        }
+      });
+      return messages;
+    }
+
+    function showPartCD() {
+      document.getElementById('partCSection')?.classList.remove('hidden');
+      document.getElementById('partDSection')?.classList.remove('hidden');
+    }
+    function hidePartCD() {
+      document.getElementById('partCSection')?.classList.add('hidden');
+      document.getElementById('partDSection')?.classList.add('hidden');
+    }
+    function handleCalculate() {
+      const validationMessages = validateBeforeCalculate();
+      if (validationMessages.length) {
+        hasCalculated = false;
+        hidePartCD();
+        showCalcError(validationMessages);
+        return;
+      }
+      clearCalcError();
+      hasCalculated = true;
+      showPartCD();
+      recalculateAll();
+    }
+
+    function recalculateAll() { const t = getTargetForYear(document.getElementById('reportingYear').value); const actualMultiplier = getActualMultiplier(); updateWindDisplay(); updatePeriodSummary(); document.getElementById('heroTarget').textContent = fmt(t.target, 4); document.getElementById('reductionLabel').value = t.label; let total = 0, denom = 0, nw = 0, nt = 0; document.querySelectorAll('#fuelRows tr').forEach(tr => { const e = Number(tr.dataset.energyMj) || 0, er = Number(tr.dataset.rewardedEnergyMj) || 0, w = Number(tr.dataset.wtt) || 0, tt = Number(tr.dataset.ttw) || 0; total += e; denom += er; nw += w * e; nt += tt * e; }); const d = denom > 0 ? denom : total; const weightedWtt = d > 0 ? nw / d : 0, weightedTtw = d > 0 ? nt / d : 0; const actual = (weightedWtt + weightedTtw) * actualMultiplier; const balanceG = (t.target - actual) * total; const balanceT = balanceG / 1000000; const compliant = total > 0 ? balanceG >= 0 : null; let penaltyText = 'EUR NA'; if (compliant === false && actual > 0) { const penalty = (Math.abs(balanceG) / (actual * 41000)) * 2400; penaltyText = fmtMoney(penalty); } document.getElementById('weightedWtt').textContent = fmt(weightedWtt, 5); document.getElementById('weightedTtw').textContent = fmt(weightedTtw, 5); document.getElementById('totalEnergy').textContent = fmt0(total); document.getElementById('penalty').textContent = penaltyText; document.getElementById('heroActual').textContent = fmt(actual, 5); document.getElementById('heroBalance').textContent = fmtBalanceT(balanceT); const statusPill = document.getElementById('statusPill'), statusText = document.getElementById('statusText'), heroStatus = document.getElementById('heroStatus'), heroPenalty = document.getElementById('heroPenalty'); if (total <= 0) { if (statusPill) { statusPill.className = 'pill good'; statusPill.textContent = 'READY'; } if (statusText) statusText.textContent = 'Enter data to calculate compliance.'; heroStatus.textContent = 'Ready'; heroStatus.className = 'value status-good'; heroPenalty.textContent = 'Penalty: EUR NA'; } else if (balanceG >= 0) { if (statusPill) { statusPill.className = 'pill good'; statusPill.textContent = 'COMPLIANT'; } if (statusText) statusText.textContent = 'Vessel is compliant based on the current entries.'; heroStatus.textContent = 'Compliant'; heroStatus.className = 'value status-good'; heroPenalty.textContent = 'Penalty: EUR NA'; } else { if (statusPill) { statusPill.className = 'pill bad'; statusPill.textContent = 'NOT COMPLIANT'; } if (statusText) statusText.textContent = 'Action required — actual GHG intensity is above the target.'; heroStatus.textContent = 'Not compliant'; heroStatus.className = 'value status-bad'; heroPenalty.textContent = 'Penalty: ' + penaltyText; } const penaltyModeEl = document.getElementById('penaltyMode'); if (penaltyModeEl) penaltyModeEl.value = penaltyText === 'EUR NA' ? 'EUR NA when compliant' : penaltyText; const rows = buildYearResults(actual, total); renderYearTable(rows); renderPenaltyChart(rows); if (document.getElementById('detailResultToggle').value === 'YES') { renderDetailResultTable(); } }
+
+    function fmtINNumberVar(n, maxD = 5) { const num = Number(n); return Number.isFinite(num) ? num.toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: maxD }) : ''; }
+    function fmtINMoney(n) { const num = Number(n); return Number.isFinite(num) ? '€ ' + num.toLocaleString('en-IN', { maximumFractionDigits: 0 }) : '€ 0'; }
+    function escapeXml(v) { return String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;'); }
+    function getRowXml(tr, index) {
+      return `<FuelRow index="${index + 1}">`
+        + `<FuelName>${escapeXml(tr.querySelector('.fuel-select')?.value || '')}</FuelName>`
+        + `<PoSPoC>${escapeXml(tr.querySelector('.pospoc')?.value || 'NO')}</PoSPoC>`
+        + `<Qty100>${escapeXml(tr.querySelector('.qty100')?.value || '')}</Qty100>`
+        + `<Qty50>${escapeXml(tr.querySelector('.qty50')?.value || '')}</Qty50>`
+        + `<LcvMode>${escapeXml(tr.dataset.lcvMode || 'base')}</LcvMode>`
+        + `<CustomLcv>${escapeXml(tr.dataset.customLcv || '')}</CustomLcv>`
+        + `<EMode>${escapeXml(tr.dataset.eMode || 'base')}</EMode>`
+        + `<CustomE>${escapeXml(tr.dataset.customE || '')}</CustomE>`
+        + `<EValue>${escapeXml(tr.dataset.eValue || '')}</EValue>`
+        + `<EuMode>${escapeXml(tr.dataset.euMode || 'base')}</EuMode>`
+        + `<CustomEu>${escapeXml(tr.dataset.customEu || '')}</CustomEu>`
+        + `</FuelRow>`;
+    }
+    function downloadXml() {
+      const rows = [...document.querySelectorAll('#fuelRows tr')];
+      const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<FuelEUCalculator>\n  <PartA>\n    <ShipName>${escapeXml(document.getElementById('shipName')?.value || '')}</ShipName>\n    <IMONumber>${escapeXml(document.getElementById('imoNumber')?.value || '')}</IMONumber>\n    <ReportingYear>${escapeXml(document.getElementById('reportingYear')?.value || '')}</ReportingYear>\n    <FromDate>${escapeXml(document.getElementById('fromDate')?.value || '')}</FromDate>\n    <ToDate>${escapeXml(document.getElementById('toDate')?.value || '')}</ToDate>\n    <TotalDistance>${escapeXml(document.getElementById('totalDistance')?.value || '0')}</TotalDistance>\n    <TimeSea>${escapeXml(document.getElementById('timeSea')?.value || '0')}</TimeSea>\n    <TimeAnchorage>${escapeXml(document.getElementById('timeAnchorage')?.value || '0')}</TimeAnchorage>\n    <FuelCount>${escapeXml(document.getElementById('fuelCount')?.value || rows.length || 0)}</FuelCount>\n    <WindApplicable>${escapeXml(document.getElementById('windApplicable')?.value || 'NO')}</WindApplicable>\n    <SelectedFwind>${escapeXml(selectedFwind)}</SelectedFwind>\n  </PartA>\n  <PartB>\n    ${rows.map((tr, i) => getRowXml(tr, i)).join('\n    ')}\n  </PartB>\n</FuelEUCalculator>`;
+      const blob = new Blob([xml], { type: 'application/xml' });
+      const a = document.createElement('a');
+      const ship = (document.getElementById('shipName')?.value || 'FuelEU').replace(/[^a-z0-9_\-]+/gi, '_');
+      const year = document.getElementById('reportingYear')?.value || 'YEAR';
+      a.href = URL.createObjectURL(blob);
+      a.download = `${ship}_${year}_FuelEU_Data.xml`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(a.href);
+    }
+    function readNodeText(parent, tag) { const n = parent?.querySelector(tag); return n ? n.textContent : ''; }
+    function importXmlFromText(xmlText) {
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(xmlText, 'application/xml');
+      if (xml.querySelector('parsererror')) { alert('Invalid XML file. Please import a valid XML.'); return; }
+      const partA = xml.querySelector('PartA');
+      const partB = xml.querySelector('PartB');
+      if (!partA || !partB) { alert('XML structure is not valid for this calculator.'); return; }
+
+      document.getElementById('shipName').value = readNodeText(partA, 'ShipName');
+      document.getElementById('imoNumber').value = readNodeText(partA, 'IMONumber');
+      document.getElementById('reportingYear').value = readNodeText(partA, 'ReportingYear') || '2025';
+      document.getElementById('fromDate').value = readNodeText(partA, 'FromDate');
+      document.getElementById('toDate').value = readNodeText(partA, 'ToDate');
+      document.getElementById('totalDistance').value = readNodeText(partA, 'TotalDistance') || '0';
+      document.getElementById('timeSea').value = readNodeText(partA, 'TimeSea') || '0';
+      document.getElementById('timeAnchorage').value = readNodeText(partA, 'TimeAnchorage') || '0';
+      const fuelRows = [...partB.querySelectorAll('FuelRow')];
+      const fuelCount = Math.max(1, Number(readNodeText(partA, 'FuelCount')) || fuelRows.length || 1);
+      document.getElementById('fuelCount').value = String(fuelCount);
+      renderFuelRows(fuelCount);
+
+      fuelRows.forEach((x, i) => {
+        const tr = document.querySelectorAll('#fuelRows tr')[i];
+        if (!tr) return;
+        const fuelName = readNodeText(x, 'FuelName');
+        tr.querySelector('.fuel-select').value = fuelName;
+        updateFuelRow(i, true);
+        tr.querySelector('.pospoc').value = readNodeText(x, 'PoSPoC') || 'NO';
+        tr.querySelector('.qty100').value = readNodeText(x, 'Qty100');
+        tr.querySelector('.qty50').value = readNodeText(x, 'Qty50');
+        tr.dataset.lcvMode = readNodeText(x, 'LcvMode') || 'base';
+        tr.dataset.customLcv = readNodeText(x, 'CustomLcv') || '';
+        tr.dataset.eMode = readNodeText(x, 'EMode') || 'base';
+        tr.dataset.customE = readNodeText(x, 'CustomE') || '';
+        tr.dataset.eValue = readNodeText(x, 'EValue') || '';
+        tr.dataset.euMode = readNodeText(x, 'EuMode') || 'base';
+        tr.dataset.customEu = readNodeText(x, 'CustomEu') || '';
+        updateFuelRow(i, false);
+      });
+
+      const windApplicable = readNodeText(partA, 'WindApplicable') || 'NO';
+      document.getElementById('windApplicable').value = windApplicable;
+      selectedFwind = Number(readNodeText(partA, 'SelectedFwind') || 1) || 1;
+      previousWindValue = windApplicable;
+      updateWindDisplay();
+      updatePeriodSummary();
+      clearCalcError();
+      handleCalculate();
+    }
+    function handleXmlFileImport(ev) {
+      const file = ev.target.files && ev.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => { importXmlFromText(String(e.target.result || '')); ev.target.value = ''; };
+      reader.readAsText(file);
+    }
+    function renderPrintPenaltyGraph(rows) {
+      const svg = document.getElementById('pr_penaltyGraph'); if (!svg) return;
+      const width = 980, height = 360, m = { t: 28, r: 24, b: 60, l: 84 }, chartW = width - m.l - m.r, chartH = height - m.t - m.b, maxVal = Math.max(...rows.map(r => Number(r.penaltyNum) || 0), 1), ns = 'http://www.w3.org/2000/svg';
+      svg.innerHTML = ''; svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+      const defs = document.createElementNS(ns, 'defs');
+      const grad = document.createElementNS(ns, 'linearGradient'); grad.setAttribute('id', 'barGrad'); grad.setAttribute('x1', '0'); grad.setAttribute('y1', '0'); grad.setAttribute('x2', '0'); grad.setAttribute('y2', '1');[['0%', '#0ea5e9'], ['55%', '#2563eb'], ['100%', '#1d4ed8']].forEach(([o, c]) => { const s = document.createElementNS(ns, 'stop'); s.setAttribute('offset', o); s.setAttribute('stop-color', c); grad.appendChild(s); }); defs.appendChild(grad);
+      const grad2 = document.createElementNS(ns, 'linearGradient'); grad2.setAttribute('id', 'lineGrad'); grad2.setAttribute('x1', '0'); grad2.setAttribute('y1', '0'); grad2.setAttribute('x2', '1'); grad2.setAttribute('y2', '0');[['0%', '#14b8a6'], ['100%', '#0ea5e9']].forEach(([o, c]) => { const s = document.createElementNS(ns, 'stop'); s.setAttribute('offset', o); s.setAttribute('stop-color', c); grad2.appendChild(s); }); defs.appendChild(grad2); svg.appendChild(defs);
+      const bg = document.createElementNS(ns, 'rect'); bg.setAttribute('x', '0'); bg.setAttribute('y', '0'); bg.setAttribute('width', width); bg.setAttribute('height', height); bg.setAttribute('fill', '#ffffff'); svg.appendChild(bg);
+      for (let i = 0; i < 5; i++) { const val = maxVal * (i / 4), y = m.t + chartH - (val / maxVal) * chartH; const line = document.createElementNS(ns, 'line'); line.setAttribute('x1', m.l); line.setAttribute('x2', width - m.r); line.setAttribute('y1', y); line.setAttribute('y2', y); line.setAttribute('stroke', '#dbe7f3'); line.setAttribute('stroke-width', '1'); svg.appendChild(line); const label = document.createElementNS(ns, 'text'); label.setAttribute('x', m.l - 10); label.setAttribute('y', y + 4); label.setAttribute('text-anchor', 'end'); label.setAttribute('font-size', '11'); label.setAttribute('font-family', 'Inter,Segoe UI,Arial'); label.setAttribute('fill', '#475569'); label.textContent = '€ ' + Number(val).toLocaleString('en-IN', { maximumFractionDigits: 0 }); svg.appendChild(label); }
+      const axisX = document.createElementNS(ns, 'line'); axisX.setAttribute('x1', m.l); axisX.setAttribute('x2', width - m.r); axisX.setAttribute('y1', m.t + chartH); axisX.setAttribute('y2', m.t + chartH); axisX.setAttribute('stroke', '#475569'); axisX.setAttribute('stroke-width', '1.3'); svg.appendChild(axisX);
+      const axisY = document.createElementNS(ns, 'line'); axisY.setAttribute('x1', m.l); axisY.setAttribute('x2', m.l); axisY.setAttribute('y1', m.t); axisY.setAttribute('y2', m.t + chartH); axisY.setAttribute('stroke', '#475569'); axisY.setAttribute('stroke-width', '1.3'); svg.appendChild(axisY);
+      const n = rows.length || 1, slot = chartW / n, barW = Math.min(72, slot * 0.46); let path = '';
+      rows.forEach((r, i) => { const cx = m.l + slot * i + slot / 2, h = ((Number(r.penaltyNum) || 0) / maxVal) * chartH, y = m.t + chartH - h; const bar = document.createElementNS(ns, 'rect'); bar.setAttribute('x', cx - barW / 2); bar.setAttribute('y', y); bar.setAttribute('width', barW); bar.setAttribute('height', Math.max(h, 2)); bar.setAttribute('rx', '8'); bar.setAttribute('fill', 'url(#barGrad)'); bar.setAttribute('opacity', '0.95'); svg.appendChild(bar); const value = document.createElementNS(ns, 'text'); value.setAttribute('x', cx); value.setAttribute('y', y - 8); value.setAttribute('text-anchor', 'middle'); value.setAttribute('font-size', '10'); value.setAttribute('font-family', 'Inter,Segoe UI,Arial'); value.setAttribute('font-weight', '700'); value.setAttribute('fill', '#0f172a'); value.textContent = '€ ' + Number(r.penaltyNum || 0).toLocaleString('en-IN', { maximumFractionDigits: 0 }); svg.appendChild(value); const year = document.createElementNS(ns, 'text'); year.setAttribute('x', cx); year.setAttribute('y', m.t + chartH + 22); year.setAttribute('text-anchor', 'middle'); year.setAttribute('font-size', '11'); year.setAttribute('font-family', 'Inter,Segoe UI,Arial'); year.setAttribute('font-weight', '700'); year.setAttribute('fill', '#334155'); year.textContent = String(r.year); svg.appendChild(year); path += (i === 0 ? `M ${cx} ${y}` : ` L ${cx} ${y}`); });
+      const line = document.createElementNS(ns, 'path'); line.setAttribute('d', path); line.setAttribute('fill', 'none'); line.setAttribute('stroke', 'url(#lineGrad)'); line.setAttribute('stroke-width', '3'); svg.appendChild(line);
+      rows.forEach((r, i) => { const cx = m.l + slot * i + slot / 2, h = ((Number(r.penaltyNum) || 0) / maxVal) * chartH, y = m.t + chartH - h; const pt = document.createElementNS(ns, 'circle'); pt.setAttribute('cx', cx); pt.setAttribute('cy', y); pt.setAttribute('r', '4.5'); pt.setAttribute('fill', '#0f172a'); pt.setAttribute('stroke', '#ffffff'); pt.setAttribute('stroke-width', '2'); svg.appendChild(pt); });
+      const xl = document.createElementNS(ns, 'text'); xl.setAttribute('x', m.l + chartW / 2); xl.setAttribute('y', height - 12); xl.setAttribute('text-anchor', 'middle'); xl.setAttribute('font-size', '12'); xl.setAttribute('font-family', 'Inter,Segoe UI,Arial'); xl.setAttribute('font-weight', '700'); xl.setAttribute('fill', '#0f172a'); xl.textContent = 'Years'; svg.appendChild(xl);
+      const yl = document.createElementNS(ns, 'text'); yl.setAttribute('x', 18); yl.setAttribute('y', m.t + chartH / 2); yl.setAttribute('text-anchor', 'middle'); yl.setAttribute('font-size', '12'); yl.setAttribute('font-family', 'Inter,Segoe UI,Arial'); yl.setAttribute('font-weight', '700'); yl.setAttribute('fill', '#0f172a'); yl.setAttribute('transform', `rotate(-90 18 ${m.t + chartH / 2})`); yl.textContent = 'Penalty (€)'; svg.appendChild(yl);
+    }
+    function populatePrintReport() {
+      if (typeof recalculateAll === 'function') recalculateAll();
+      const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = (val === undefined || val === null || val === '') ? '-' : String(val); };
+      setText('cvShip', document.getElementById('shipName')?.value || '-');
+      setText('cvIMO', document.getElementById('imoNumber')?.value || '-');
+      setText('cvYear', document.getElementById('reportingYear')?.value || '-');
+      setText('cvPeriod', document.getElementById('periodSummary')?.value || '-');
+      setText('pr_shipName', document.getElementById('shipName')?.value || '-');
+      setText('pr_imoNumber', document.getElementById('imoNumber')?.value || '-');
+      setText('pr_reportingYear', document.getElementById('reportingYear')?.value || '-');
+      setText('pr_fromDate', document.getElementById('fromDate')?.value || '-');
+      setText('pr_toDate', document.getElementById('toDate')?.value || '-');
+      setText('pr_totalDistance', fmtINNumberVar(document.getElementById('totalDistance')?.value || 0, 2));
+      setText('pr_timeSea', fmtINNumberVar(document.getElementById('timeSea')?.value || 0, 2));
+      setText('pr_timeAnchorage', fmtINNumberVar(document.getElementById('timeAnchorage')?.value || 0, 2));
+      setText('pr_fuelCount', document.getElementById('fuelCount')?.value || '-');
+      setText('pr_windApplicable', document.getElementById('windApplicable')?.value || '-');
+      const partBBody = document.getElementById('pr_partBBody'); if (partBBody) { partBBody.innerHTML = ''; const rows = [...document.querySelectorAll('#fuelRows tr')]; if (!rows.length) { const tr = document.createElement('tr'); tr.innerHTML = '<td colspan="6">-</td>'; partBBody.appendChild(tr); } else { rows.forEach(tr => { const row = document.createElement('tr'); row.innerHTML = `<td>${tr.querySelector('.fuel-select')?.value || '-'}</td><td>${tr.querySelector('.pospoc')?.value || '-'}</td><td>${tr.querySelector('.active-lcv')?.textContent || '-'}</td><td>${tr.querySelector('.active-evalue')?.textContent || '-'}</td><td>${tr.querySelector('.qty100')?.value ? fmtINNumberVar(tr.querySelector('.qty100').value, 4) : '-'}</td><td>${tr.querySelector('.qty50')?.value ? fmtINNumberVar(tr.querySelector('.qty50').value, 4) : '-'}</td>`; partBBody.appendChild(row); }); } }
+      setText('pr_detailToggle', document.getElementById('detailResultToggle')?.value || 'NO');
+      setText('pr_fwind', document.getElementById('fwind')?.value || '1.00');
+      setText('pr_reductionBand', document.getElementById('reductionLabel')?.value || '-');
+      setText('pr_periodSummary', document.getElementById('periodSummary')?.value || '-');
+      setText('pr_heroActual', document.getElementById('heroActual')?.textContent || '-');
+      setText('pr_heroTarget', document.getElementById('heroTarget')?.textContent || '-');
+      setText('pr_heroBalance', document.getElementById('heroBalance')?.textContent || '-');
+      setText('pr_heroStatus', document.getElementById('heroStatus')?.textContent || '-');
+      setText('pr_penaltyNote', document.getElementById('heroPenalty')?.textContent || 'Penalty: EUR NA');
+      const totalEnergyRaw = Number(document.getElementById('totalEnergy')?.textContent?.replace(/,/g, '') || 0); setText('pr_totalEnergy', Number.isFinite(totalEnergyRaw) ? totalEnergyRaw.toLocaleString('en-IN') : '-');
+      setText('pr_weightedWtt', document.getElementById('weightedWtt')?.textContent || '-');
+      setText('pr_weightedTtw', document.getElementById('weightedTtw')?.textContent || '-');
+      setText('pr_penalty', document.getElementById('penalty')?.textContent || '-');
+      const detailBody = document.getElementById('pr_partCDetailBody'); if (detailBody) { detailBody.innerHTML = ''; let rows = []; if (typeof buildDetailAggregates === 'function') { rows = buildDetailAggregates() || []; } if (!rows.length) { const tr = document.createElement('tr'); tr.innerHTML = '<td colspan="9">No detailed result available.</td>'; detailBody.appendChild(tr); } else { rows.forEach(r => { const tr = document.createElement('tr'); tr.innerHTML = `<td>${r.fuelName || '-'}</td><td>${fmtINNumberVar(r.energyMilMj, 4)}</td><td>${fmtINNumberVar(r.wtt, 5)}</td><td>${fmtINNumberVar(r.ttwCO2, 5)}</td><td>${fmtINNumberVar(r.ttwCH4, 5)}</td><td>${fmtINNumberVar(r.ttwN2O, 5)}</td><td>${fmtINNumberVar(r.slipPct, 2)}</td><td>${fmtINNumberVar(r.ttw, 5)}</td><td>${fmtINNumberVar(r.reward, 2)}</td>`; detailBody.appendChild(tr); }); } }
+      const partDRows = (typeof buildYearResults === 'function') ? buildYearResults(Number(document.getElementById('heroActual')?.textContent?.replace(/,/g, '') || 0), Number(document.getElementById('totalEnergy')?.textContent?.replace(/,/g, '') || 0)) : [];
+      const partDBody = document.getElementById('pr_partDBody'); if (partDBody) { partDBody.innerHTML = ''; partDRows.forEach(r => { const tr = document.createElement('tr'); tr.innerHTML = `<td>${r.year}</td><td>${fmtINNumberVar(r.reduction, 2)}</td><td>${fmtINNumberVar(r.required, 2)}</td><td>${r.balanceT >= 0 ? fmtINNumberVar(r.balanceT, 2) : '-' + fmtINNumberVar(Math.abs(r.balanceT), 2)}</td><td>${r.penaltyNum > 0 ? fmtINMoney(r.penaltyNum) : '€ 0'}</td>`; partDBody.appendChild(tr); }); }
+      renderPrintPenaltyGraph(partDRows);
+    }
+    function fillYearOptions() { const sel = document.getElementById('reportingYear'); for (let y = 2025; y <= 2055; y++) { const op = document.createElement('option'); op.value = y; op.textContent = y; if (y === 2025) op.selected = true; sel.appendChild(op); } sel.addEventListener('change', recalculateAll); }
+    function fillFuelCountOptions() { const sel = document.getElementById('fuelCount'); for (let i = 1; i <= 20; i++) { const op = document.createElement('option'); op.value = i; op.textContent = i; if (i === 3) op.selected = true; sel.appendChild(op); } sel.addEventListener('change', e => renderFuelRows(Number(e.target.value))); }
+    function loadSampleCase() { hidePartCD(); hasCalculated = false; clearCalcError(); document.getElementById('shipName').value = 'Sample Vessel'; document.getElementById('imoNumber').value = '1234567'; document.getElementById('reportingYear').value = '2025'; document.getElementById('fromDate').value = '2025-01-01'; document.getElementById('toDate').value = '2025-12-31'; document.getElementById('fuelCount').value = '3'; renderFuelRows(3); const rows = document.querySelectorAll('#fuelRows tr'); const sample = [{ fuel: 'HFO (Grades RME to RMK)', pos: 'NO', q100: 11816, q50: 0 }, { fuel: 'e-diesel', pos: 'YES', q100: 400, q50: 0, eValue: 10, euMode: 'base' }, { fuel: 'e-LNG / Otto (dual fuel medium speed)', pos: 'YES', q100: 250, q50: 0, eValue: 12, euMode: 'custom', customEu: 54.0 }]; sample.forEach((s, i) => { if (!rows[i]) return; rows[i].querySelector('.fuel-select').value = s.fuel; rows[i].querySelector('.pospoc').value = s.pos; rows[i].querySelector('.qty100').value = s.q100; rows[i].querySelector('.qty50').value = s.q50; rows[i].dataset.eMode = (s.eValue !== undefined && s.eValue !== null) ? 'custom' : 'base'; rows[i].dataset.customE = (s.eValue !== undefined && s.eValue !== null) ? String(s.eValue) : ''; rows[i].dataset.eValue = ''; rows[i].dataset.euMode = s.euMode || 'base'; rows[i].dataset.customEu = s.customEu || ''; updateFuelRow(i, true); }); previousWindValue = 'NO'; document.getElementById('windApplicable').value = 'NO'; selectedFwind = 1; updateWindDisplay(); recalculateAll(); }
+    function resetForm() {
+      hidePartCD(); hasCalculated = false;
+      document.getElementById('shipName').value = '';
+      document.getElementById('imoNumber').value = '';
+      document.getElementById('reportingYear').value = '2025';
+      document.getElementById('fromDate').value = '';
+      document.getElementById('toDate').value = '';
+      document.getElementById('totalDistance').value = '0';
+      document.getElementById('timeSea').value = '0';
+      document.getElementById('timeAnchorage').value = '0';
+      document.getElementById('fuelCount').value = '3';
+      document.getElementById('windApplicable').value = 'NO';
+      document.getElementById('detailResultToggle').value = 'NO';
+      selectedFwind = 1; previousWindValue = 'NO';
+      document.getElementById('modalFwindSelect').value = '1';
+      document.getElementById('modalLcvMode').value = 'base';
+      document.getElementById('modalCustomLcv').value = '';
+      document.getElementById('modalEMode').value = 'base';
+      document.getElementById('modalCustomE').value = '';
+      document.getElementById('modalBaseE').value = '';
+      document.getElementById('modalBaseLcv').value = '';
+      document.getElementById('modalEuMode').value = 'base';
+      document.getElementById('modalCustomEu').value = '';
+      document.getElementById('modalBaseEu').value = '';
+      const windRuleEl = document.getElementById('windRule'); if (windRuleEl) windRuleEl.value = '';
+      const actualFormulaEl = document.getElementById('actualFormula'); if (actualFormulaEl) actualFormulaEl.value = '';
+      const penaltyModeEl = document.getElementById('penaltyMode'); if (penaltyModeEl) penaltyModeEl.value = 'EUR NA when compliant';
+      closeAllModals();
+      updateWindDisplay(); updatePeriodSummary();
+      renderFuelRows(3);
+      document.querySelectorAll('#fuelRows tr').forEach(tr => {
+        tr.querySelector('.pospoc').value = 'NO';
+        tr.querySelector('.fuel-select').value = '';
+        tr.querySelector('.qty100').value = '';
+        tr.querySelector('.qty50').value = '';
+      });
+      recalculateAll();
+    }
+    function setSectionCollapsed(sectionId, collapsed) { const section = document.getElementById(sectionId); if (!section) return; const btn = section.querySelector('.section-toggle'); section.classList.toggle('collapsed', !!collapsed); if (btn) { btn.textContent = collapsed ? '∨' : '∧'; btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true'); const badge = section.querySelector('.section-badge')?.textContent || 'section'; btn.setAttribute('aria-label', (collapsed ? 'Expand ' : 'Collapse ') + badge); } } function toggleSection(sectionId) { const section = document.getElementById(sectionId); if (!section) return; const collapsed = section.classList.contains('collapsed'); setSectionCollapsed(sectionId, !collapsed); } function initSectionToggles() { document.querySelectorAll('.section-toggle').forEach(btn => { if (btn.dataset.bound === '1') return; btn.dataset.bound = '1'; btn.addEventListener('click', () => toggleSection(btn.dataset.target)); const section = document.getElementById(btn.dataset.target); setSectionCollapsed(btn.dataset.target, !!section?.classList.contains('collapsed')); }); } document.getElementById('windApplicable').addEventListener('change', e => { const v = e.target.value; if (v === 'YES') { previousWindValue = 'YES'; openFwindModal(); } else { previousWindValue = 'NO'; selectedFwind = 1; updateWindDisplay(); recalculateAll(); } });
+    document.getElementById('detailResultToggle').addEventListener('change', e => { if (e.target.value === 'YES') { openDetailModal(); } else { closeDetailModal(); } });
+    document.getElementById('xmlFileInput').addEventListener('change', handleXmlFileImport); document.getElementById('fromDate').addEventListener('change', recalculateAll); hasCalculated = false; hidePartCD();; document.getElementById('toDate').addEventListener('change', recalculateAll); hasCalculated = false; hidePartCD();; document.getElementById('modalLcvMode').addEventListener('change', updatePosModalFields); document.getElementById('modalEMode').addEventListener('change', updatePosModalFields); document.getElementById('modalEuMode').addEventListener('change', updatePosModalFields); fillYearOptions(); fillFuelCountOptions(); updateWindDisplay(); updatePeriodSummary(); renderFuelRows(3); initSectionToggles(); hidePartCD(); recalculateAll();
+  </script>
+
+  <script>
+    window.onbeforeprint = () => {
+      if (typeof populatePrintReport === 'function') populatePrintReport();
+    };
+    window.onafterprint = () => {
+      const imo = document.getElementById('imoNumber')?.value || 'IMO';
+      const yr = document.getElementById('reportingYear')?.value || 'YEAR';
+      document.title = `FuelEU_${imo}_${yr}_Compliance_Report`;
+    };
+  </script>
+
+
+  <script>
+    (function () {
+      function syncFuelCountWithRows() {
+        const sel = document.getElementById('fuelCount');
+        const rowCount = document.querySelectorAll('#fuelRows tr').length || 1;
+        if (!sel) return;
+        if (![...sel.options].some(op => Number(op.value) === rowCount)) {
+          const op = document.createElement('option');
+          op.value = String(rowCount);
+          op.textContent = String(rowCount);
+          sel.appendChild(op);
+        }
+        sel.value = String(rowCount);
+      }
+
+      function patchPartBActionColumn() {
+        const table = document.getElementById('partBTable');
+        const headRow = table?.querySelector('thead tr');
+        if (headRow && !headRow.querySelector('.partb-actions-head')) {
+          const th = document.createElement('th');
+          th.className = 'partb-actions-head';
+          th.textContent = 'Actions';
+          headRow.appendChild(th);
+        }
+        document.querySelectorAll('#fuelRows tr').forEach((tr, index) => {
+          let td = tr.querySelector('.partb-action-cell');
+          if (!td) {
+            td = document.createElement('td');
+            td.className = 'partb-action-cell';
+            tr.appendChild(td);
+          }
+          td.innerHTML = `<button type="button" class="partb-row-remove" onclick="removeFuelRow(${index})">Remove</button>`;
+        });
+        syncFuelCountWithRows();
+      }
+
+      const originalRenderFuelRows = window.renderFuelRows;
+      window.renderFuelRows = function (count) {
+        originalRenderFuelRows(count);
+        patchPartBActionColumn();
+      };
+
+      window.addFuelRow = function () {
+        markPartBDirty();
+        const current = document.querySelectorAll('#fuelRows tr').length || 0;
+        window.renderFuelRows(current + 1);
+        requestAnimationFrame(() => {
+          const rows = document.querySelectorAll('#fuelRows tr');
+          const firstNewRow = rows[current];
+          if (firstNewRow) {
+            const rowTop = firstNewRow.getBoundingClientRect().top + window.pageYOffset;
+            window.scrollTo(0, Math.max(rowTop, 0));
+          }
+        });
+      };
+
+      window.removeFuelRow = function (index) {
+        const tbody = document.getElementById('fuelRows');
+        const rows = [...tbody.querySelectorAll('tr')];
+        if (rows.length <= 1) return;
+        markPartBDirty();
+        const targetIndex = Math.max(0, Math.min(index, rows.length - 2));
+        rows[index]?.remove();
+        originalRenderFuelRows(rows.length - 1);
+        patchPartBActionColumn();
+        requestAnimationFrame(() => {
+          const updatedRows = document.querySelectorAll('#fuelRows tr');
+          const focusRow = updatedRows[targetIndex];
+          if (focusRow) {
+            const rowTop = focusRow.getBoundingClientRect().top + window.pageYOffset - 32;
+            window.scrollTo(0, Math.max(rowTop, 0));
+          }
+        });
+      };
+
+      patchPartBActionColumn();
+    })();
+  </script>
+
+</body>
+
+</html>

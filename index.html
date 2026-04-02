@@ -2,160 +2,860 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FuelEU Compliance Balance</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FuelEU – Maritime Compliance Portal</title>
+    <meta name="description"
+        content="Official FuelEU Maritime Compliance Portal. Calculate GHG intensity, manage pooling, and access reference documentation." />
+    <meta name="author" content="FuelEU Compliance Portal" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
     <style>
+        :root {
+            --ink: #0f2f3f;
+            --blue: #1f5d7a;
+            --blue2: #2f7aa0;
+            --accent: #33d6ff;
+            --muted: #5c7f93;
+            --teal: #16d6c0;
+            --gold: #ffc857;
+            --violet: #8e77ff
+        }
+
         * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif
+            box-sizing: border-box
         }
 
         body {
-            height: 100vh;
+            margin: 0;
+            min-height: 100vh;
             display: flex;
-            justify-content: center;
             align-items: center;
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            justify-content: center;
+            background: radial-gradient(circle at top, #15304b 0%, #07111f 45%, #030910 100%);
+            font-family: 'Poppins', Segoe UI, Arial, sans-serif
         }
 
-        .container {
-            width: 350px;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(12px);
-            border-radius: 20px;
-            padding: 30px;
+        .portal {
+            max-width: 1180px;
+            width: 95%;
+            background: #fff;
+            border-radius: 26px;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, .45);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 360px 1fr 1fr
+        }
+
+        @media(max-width:1100px) {
+            .portal {
+                grid-template-columns: 1fr
+            }
+        }
+
+        /* ===== ABOUT THIS TOOL ===== */
+        .about-tool {
+            background: linear-gradient(180deg, #0f2f3f, #061823);
+            color: #eaf7ff;
+            padding: 36px 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            isolation: isolate
+        }
+
+        .about-tool::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 20% 20%, rgba(51, 214, 255, .08), transparent 35%), radial-gradient(circle at 85% 15%, rgba(22, 214, 192, .08), transparent 30%);
+            pointer-events: none;
+            z-index: -1
+        }
+
+        .about-tool h3 {
+            margin: 0 0 14px;
+            font-size: 20px;
+            letter-spacing: .5px
+        }
+
+        .about-tool p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #cfe6f5
+        }
+
+        /* ===== UPDATED LOGO BOX BELOW ABOUT THIS TOOL ===== */
+        .logo-box {
+            margin: 22px 0 26px;
             text-align: center;
-            color: #fff;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-radius: 24px;
+            padding: 18px 12px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .02));
+            border: 1px solid rgba(255, 255, 255, .08);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 12px 28px rgba(0, 0, 0, .18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 220px
         }
 
-        /* Animated logo styling */
-        .ship-logo {
-            width: 85px;
-            margin-bottom: 12px;
-            filter: drop-shadow(0 0 12px rgba(0, 212, 255, 0.5));
+        .logo-box svg {
+            width: 150px;
+            height: 150px;
+            filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.6))
+        }
+
+        .link-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, .25);
+            background: transparent;
+            color: #eaf7ff;
+            font-weight: 800;
+            cursor: pointer;
+            transition: .25s ease
+        }
+
+        .link-btn:hover {
+            background: rgba(255, 255, 255, .12);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, .18)
+        }
+
+        .about-footer {
+            font-size: 11px;
+            color: #9fb7c8;
+            text-align: center
+        }
+
+        /* ===== BRAND ===== */
+        .brand {
+            background: linear-gradient(180deg, #f7fbff, #eef4f8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 42px
         }
 
         .logo {
-            font-size: 26px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            letter-spacing: 1px;
+            text-align: center
         }
 
-        .logo span {
-            color: #00d4ff;
+        .ship-logo-main {
+            position: relative;
+            width: 220px;
+            height: 120px;
+            margin: 0 auto 12px
         }
 
-        button {
+        .smokestack {
+            position: absolute;
+            top: 6px;
+            left: 98px;
+            width: 20px;
+            height: 34px;
+            background: #143a4c;
+            border-radius: 5px
+        }
+
+        .co2 {
+            position: absolute;
+            top: -8px;
+            left: 90px;
+            padding: 6px 12px;
+            background: #eef2f4;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            opacity: 0;
+            animation: co2 3.2s infinite
+        }
+
+        .co2.b2 {
+            left: 112px;
+            animation-delay: 1.2s
+        }
+
+        .co2.b3 {
+            left: 100px;
+            animation-delay: 2.4s
+        }
+
+        @keyframes co2 {
+            0% {
+                transform: translateY(0);
+                opacity: 0
+            }
+
+            20% {
+                opacity: .9
+            }
+
+            100% {
+                transform: translateY(-60px);
+                opacity: 0
+            }
+        }
+
+        .deck {
+            position: absolute;
+            bottom: 58px;
+            left: 62px;
+            width: 96px;
+            height: 34px;
+            background: #9fd0e6;
+            border-radius: 8px
+        }
+
+        .hull {
+            position: absolute;
+            bottom: 24px;
+            width: 220px;
+            height: 46px;
+            background: linear-gradient(180deg, #2f7aa0, #0f2f3f);
+            border-radius: 0 0 36px 36px
+        }
+
+        /* --- CONSTANT-WIDTH LOADING LINE (ABOVE FuelEU) --- */
+        .waves {
+            height: 10px;
+            overflow: hidden;
+            margin: 8px auto 10px;
+            width: 180px;
+            border-radius: 999px;
+            background: rgba(31, 93, 122, .12);
+            box-shadow: inset 0 0 0 1px rgba(15, 47, 63, .08)
+        }
+
+        .waves span {
+            display: block;
+            height: 100%;
             width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            background: #00d4ff;
-            color: #000;
-            font-weight: 600;
+            background: linear-gradient(90deg, rgba(51, 214, 255, .25) 0%, rgba(51, 214, 255, .95) 35%, rgba(51, 214, 255, .25) 70%);
+            background-size: 200% 100%;
+            animation: loadingSweep 1.4s linear infinite
+        }
+
+        @keyframes loadingSweep {
+            from {
+                background-position: 200% 0
+            }
+
+            to {
+                background-position: -200% 0
+            }
+        }
+
+        .logo h1 {
+            margin: 12px 0 4px;
+            color: #0f2f3f;
+            font-size: 30px;
+            letter-spacing: 1px
+        }
+
+        .logo p {
+            margin: 0;
+            color: #5c7f93;
+            font-size: 13px
+        }
+
+        /* ===== ACCESS ===== */
+        .access {
+            padding: 54px 46px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center
+        }
+
+        .access h2 {
+            margin: 0 0 10px;
+            color: #0f2f3f
+        }
+
+        .access p {
+            margin: 0 0 26px;
+            color: #5c7f93;
+            font-size: 14px
+        }
+
+        .card-btn {
+            position: relative;
+            padding: 18px 18px 18px 20px;
+            border-radius: 18px;
+            border: 1px solid #dde7ef;
+            background: #f9fcff;
+            margin-bottom: 16px;
             cursor: pointer;
-            margin-top: 10px;
-            transition: 0.3s;
+            text-align: left;
+            transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease, color .28s ease;
+            overflow: hidden;
+            isolation: isolate
         }
 
-        button:hover {
-            background: #00a8cc;
-            color: #fff;
+        /* left-to-right full fill animation */
+        .card-btn::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            transform: scaleX(0);
+            transform-origin: left center;
+            transition: transform .38s ease;
+            z-index: -1
         }
 
-        .result {
-            margin-top: 20px;
-            font-size: 18px;
-            font-weight: 500;
-            color: #00ffae;
+        .card-btn::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 6px;
+            border-radius: 18px 0 0 18px;
+            opacity: .8;
+            transition: width .32s ease, opacity .32s ease;
+            z-index: 0
+        }
+
+        .card-btn>* {
+            position: relative;
+            z-index: 1
+        }
+
+        .card-btn h3 {
+            margin: 0 0 4px;
+            color: #1f5d7a;
+            transition: color .28s ease
+        }
+
+        .card-btn span {
+            font-size: 13px;
+            color: #5c7f93;
+            transition: color .28s ease
+        }
+
+        .card-btn.calc::before {
+            background: linear-gradient(90deg, #16d6c0 0%, #22d8df 35%, #33d6ff 70%, #69e5ff 100%)
+        }
+
+        .card-btn.calc::after {
+            background: linear-gradient(180deg, #16d6c0, #33d6ff)
+        }
+
+        .card-btn.pool::before {
+            background: linear-gradient(90deg, #ffc857 0%, #f5a94c 35%, #b08cff 72%, #8e77ff 100%)
+        }
+
+        .card-btn.pool::after {
+            background: linear-gradient(180deg, #ffc857, #8e77ff)
+        }
+
+        .card-btn.calc:hover,
+        .card-btn.calc:focus-visible {
+            transform: translateY(-4px);
+            border-color: rgba(22, 214, 192, .55);
+            box-shadow: 0 18px 34px rgba(22, 214, 192, .22), 0 6px 16px rgba(9, 42, 62, .10)
+        }
+
+        .card-btn.pool:hover,
+        .card-btn.pool:focus-visible {
+            transform: translateY(-4px);
+            border-color: rgba(142, 119, 255, .5);
+            box-shadow: 0 18px 34px rgba(142, 119, 255, .20), 0 6px 16px rgba(73, 46, 126, .12)
+        }
+
+        .card-btn:hover::before,
+        .card-btn:focus-visible::before {
+            transform: scaleX(1)
+        }
+
+        .card-btn:hover::after,
+        .card-btn:focus-visible::after {
+            width: 100%;
+            opacity: 0
+        }
+
+        .card-btn.calc:hover h3,
+        .card-btn.calc:focus-visible h3,
+        .card-btn.calc:hover span,
+        .card-btn.calc:focus-visible span {
+            color: #ffffff
+        }
+
+        .card-btn.pool:hover h3,
+        .card-btn.pool:focus-visible h3,
+        .card-btn.pool:hover span,
+        .card-btn.pool:focus-visible span {
+            color: #ffffff
         }
 
         .footer {
-            margin-top: 15px;
+            text-align: center;
+            margin-top: 20px;
             font-size: 12px;
-            opacity: 0.7;
+            color: #7a8fa3
+        }
+
+        /* ===== REFERENCE DOCUMENT (TOP OF MODULE SELECTOR) ===== */
+        .ref-row {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin: 0 0 14px;
+            gap: 10px
+        }
+
+        .ref-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid #dde7ef;
+            background: linear-gradient(180deg, #ffffff, #f6fbff);
+            color: #0f2f3f;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease
+        }
+
+        .ref-pill:hover,
+        .ref-pill:focus-visible {
+            transform: translateY(-2px);
+            border-color: rgba(51, 214, 255, .55);
+            box-shadow: 0 14px 26px rgba(15, 47, 63, .12), 0 6px 14px rgba(51, 214, 255, .15)
+        }
+
+        .ref-ic {
+            width: 18px;
+            height: 18px;
+            display: inline-block;
+            flex: 0 0 18px
+        }
+
+        .ref-sub {
+            font-weight: 600;
+            color: #5c7f93;
+            font-size: 12px
+        }
+
+        @media(max-width:1100px) {
+            .ref-row {
+                justify-content: flex-start
+            }
+        }
+
+        /* ===== REFERENCE MODAL ===== */
+        .ref-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 10, 18, .62);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 9999
+        }
+
+        .ref-modal.show {
+            display: flex
+        }
+
+        .ref-modal-card {
+            width: min(760px, 96vw);
+            max-height: 88vh;
+            overflow: auto;
+            background: linear-gradient(180deg, #ffffff, #f6fbff);
+            border: 1px solid rgba(31, 93, 122, .12);
+            border-radius: 26px;
+            box-shadow: 0 28px 80px rgba(0, 0, 0, .35);
+            position: relative;
+            padding: 26px
+        }
+
+        .ref-modal-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px
+        }
+
+        .ref-modal-title {
+            margin: 0;
+            color: #0f2f3f;
+            font-size: 24px;
+            line-height: 1.2
+        }
+
+        .ref-modal-sub {
+            margin: 6px 0 0;
+            color: #5c7f93;
+            font-size: 14px
+        }
+
+        .ref-close {
+            border: none;
+            background: #0f2f3f;
+            color: #fff;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1;
+            box-shadow: 0 8px 18px rgba(15, 47, 63, .18);
+            transition: .2s ease
+        }
+
+        .ref-close:hover {
+            transform: translateY(-1px);
+            background: #15445a
+        }
+
+        .ref-doc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px
+        }
+
+        @media(max-width:700px) {
+            .ref-doc-grid {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .ref-doc {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            padding: 16px;
+            border-radius: 18px;
+            border: 1px solid #dfe9f0;
+            background: #fff;
+            box-shadow: 0 10px 22px rgba(15, 47, 63, .06);
+            transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease
+        }
+
+        .ref-doc:hover {
+            transform: translateY(-2px);
+            border-color: rgba(51, 214, 255, .55);
+            box-shadow: 0 16px 28px rgba(15, 47, 63, .10), 0 6px 14px rgba(51, 214, 255, .10)
+        }
+
+        .ref-doc-ic {
+            flex: 0 0 48px;
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(180deg, #eaf7ff, #d7f0ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1f5d7a;
+            font-weight: 800;
+            font-size: 13px;
+            border: 1px solid #cfe7f5
+        }
+
+        .ref-doc-body {
+            min-width: 0;
+            flex: 1
+        }
+
+        .ref-doc-name {
+            margin: 0 0 8px;
+            color: #0f2f3f;
+            font-size: 14px;
+            line-height: 1.45;
+            font-weight: 700;
+            word-break: break-word
+        }
+
+        .ref-doc-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        .ref-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 9px 12px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+            transition: .2s ease;
+            border: 1px solid transparent
+        }
+
+        .ref-action.view {
+            background: #edf8ff;
+            color: #1f5d7a;
+            border-color: #cfe7f5
+        }
+
+        .ref-action.view:hover {
+            background: #dff3ff
+        }
+
+        .ref-action.download {
+            background: linear-gradient(90deg, #16d6c0, #33d6ff);
+            color: #ffffff
+        }
+
+        .ref-action.download:hover {
+            filter: brightness(.98);
+            transform: translateY(-1px)
+        }
+
+        .ref-modal-foot {
+            margin-top: 16px;
+            color: #7a8fa3;
+            font-size: 12px;
+            text-align: center
         }
     </style>
 </head>
 
 <body>
+    <div class="portal">
+        <div class="about-tool">
+            <div>
+                <h3>About This Tool</h3>
+                <p>FuelEU Compliance Portal is designed to support maritime operators with transparent,
+                    regulation‑aligned FuelEU Maritime compliance calculations and pooling assessments.</p>
+                <div class="logo-box">
+                    <svg viewBox="0 0 120 120" width="140" height="140" xmlns="http://www.w3.org/2000/svg"
+                        aria-label="FuelEU Animated Logo">
+                        <defs>
+                            <linearGradient id="waterGrad" x1="0" x2="1">
+                                <stop offset="0%" stop-color="#00d4ff" />
+                                <stop offset="100%" stop-color="#0077ff" />
+                            </linearGradient>
+                            <linearGradient id="shipGrad" x1="0" x2="1">
+                                <stop offset="0%" stop-color="#0f2027" />
+                                <stop offset="100%" stop-color="#2c5364" />
+                            </linearGradient>
+                            <radialGradient id="co2Grad">
+                                <stop offset="0%" stop-color="#a8ffea" />
+                                <stop offset="100%" stop-color="#00d4ff" />
+                            </radialGradient>
+                        </defs>
+                        <path d="M10 85 Q20 75 30 85 T50 85 T70 85 T90 85 T110 85" fill="none" stroke="url(#waterGrad)"
+                            stroke-width="3">
+                            <animate attributeName="d" dur="3s" repeatCount="indefinite"
+                                values="M10 85 Q20 75 30 85 T50 85 T70 85 T90 85 T110 85;M10 85 Q20 95 30 85 T50 85 T70 85 T90 85 T110 85;M10 85 Q20 75 30 85 T50 85 T70 85 T90 85 T110 85" />
+                        </path>
+                        <g>
+                            <animateTransform attributeName="transform" type="rotate" values="-2 60 70;2 60 70;-2 60 70"
+                                dur="4s" repeatCount="indefinite" />
+                            <path d="M20 70 H100 L90 85 H30 Z" fill="url(#shipGrad)" stroke="#00d4ff"
+                                stroke-width="1.5" />
+                            <rect x="45" y="55" width="20" height="10" rx="2" fill="#ffffff" />
+                            <rect x="65" y="50" width="6" height="15" rx="2" fill="#00d4ff" />
+                            <circle cx="40" cy="75" r="2" fill="#a8ffea" />
+                            <circle cx="50" cy="75" r="2" fill="#a8ffea" />
+                            <circle cx="60" cy="75" r="2" fill="#a8ffea" />
+                            <circle cx="70" cy="75" r="2" fill="#a8ffea" />
+                        </g>
+                        <g>
+                            <circle cx="72" cy="50" r="4" fill="url(#co2Grad)">
+                                <animate attributeName="cy" values="50;30;50" dur="3s" repeatCount="indefinite" />
+                                <animate attributeName="opacity" values="0.8;0.1;0.8" dur="3s"
+                                    repeatCount="indefinite" />
+                            </circle>
+                            <circle cx="78" cy="45" r="3">
+                                <animate attributeName="cy" values="45;25;45" dur="3.5s" repeatCount="indefinite" />
+                                <animate attributeName="opacity" values="0.6;0.1;0.6" dur="3.5s"
+                                    repeatCount="indefinite" />
+                                <animate attributeName="fill" values="#a8ffea;#00d4ff;#a8ffea" dur="3.5s"
+                                    repeatCount="indefinite" />
+                            </circle>
+                            <circle cx="84" cy="40" r="2.5">
+                                <animate attributeName="cy" values="40;20;40" dur="4s" repeatCount="indefinite" />
+                                <animate attributeName="opacity" values="0.5;0.1;0.5" dur="4s"
+                                    repeatCount="indefinite" />
+                                <animate attributeName="fill" values="#a8ffea;#00d4ff;#a8ffea" dur="4s"
+                                    repeatCount="indefinite" />
+                            </circle>
+                        </g>
+                    </svg>
+                </div>
+                <button class="link-btn" onclick="openProfile()">View LinkedIn Profile</button>
+            </div>
+            <div class="about-footer">FuelEU Maritime Automated Suite</div>
+        </div>
+        <div class="brand">
+            <div class="logo">
+                <div class="ship-logo-main">
+                    <div class="smokestack"></div>
+                    <div class="co2">CO₂</div>
+                    <div class="co2 b2">CO₂</div>
+                    <div class="co2 b3">CO₂</div>
+                    <div class="deck"></div>
+                    <div class="hull"></div>
+                </div>
+                <div class="waves"><span></span></div>
+                <h1>FuelEU</h1>
+                <p>Maritime Compliance Portal</p>
+            </div>
+        </div>
+        <div class="access">
+            <div class="ref-row">
+                <button class="ref-pill" type="button" onclick="openReferenceModal()"
+                    aria-label="Open reference documents">
+                    <svg class="ref-ic" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true">
+                        <path d="M7 3h7l3 3v15a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" stroke="#1f5d7a"
+                            stroke-width="1.6" />
+                        <path d="M14 3v4a2 2 0 0 0 2 2h4" stroke="#33d6ff" stroke-width="1.6" />
+                        <path d="M8 12h8M8 16h8" stroke="#0f2f3f" stroke-width="1.6" stroke-linecap="round" />
+                    </svg>
+                    <span>Reference Document</span>
+                    <span class="ref-sub">6 PDFs</span>
+                </button>
+            </div>
+            <h2>Choose compliance module</h2>
+            <p>Select the tool you want to use</p>
+            <div class="card-btn calc" onclick="goCalc()">
+                <h3>FuelEU Calculator</h3><span>GHG intensity, compliance balance and penalties</span>
+            </div>
+            <div class="card-btn pool" onclick="goPool()">
+                <h3>Pooling Compliance Check</h3><span>Pooling eligibility and balance assessment</span>
+            </div>
+            <div class="footer">FuelEU Maritime Automated Suite</div>
+        </div>
+    </div>
 
-    <div class="container">
+    <!-- Reference Documents Modal -->
+    <div class="ref-modal" id="referenceModal" aria-hidden="true" role="dialog" aria-labelledby="referenceModalTitle">
+        <div class="ref-modal-card" role="document">
+            <div class="ref-modal-head">
+                <div>
+                    <h3 class="ref-modal-title" id="referenceModalTitle">Reference Documents</h3>
+                    <p class="ref-modal-sub">Click any PDF to view or download it directly.</p>
+                </div>
+                <button class="ref-close" type="button" onclick="closeReferenceModal()"
+                    aria-label="Close popup">×</button>
+            </div>
 
-        <!-- 🔥 Animated Ship Logo -->
-        <svg class="ship-logo" viewBox="0 0 88 88" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                <linearGradient id="smokeGrad" x1="0" x2="1" y1="0" y2="1">
-                    <stop offset="0%" stop-color="#a8ffea" />
-                    <stop offset="100%" stop-color="#00d4ff" />
-                </linearGradient>
+            <div class="ref-doc-grid">
+                <div class="ref-doc">
+                    <div class="ref-doc-ic">PDF</div>
+                    <div class="ref-doc-body">
+                        <p class="ref-doc-name">Official Regulation (EU) 2023/1805</p>
+                        <div class="ref-doc-actions">
+                            <a class="ref-action view" href="files/CELEX_32023R1805_EN_TXT.pdf" target="_blank"
+                                rel="noopener">Open</a>
+                            <a class="ref-action download" href="files/CELEX_32023R1805_EN_TXT.pdf" download>Download</a>
+                        </div>
+                    </div>
+                </div>
 
-                <linearGradient id="hull" x1="0" x2="1">
-                    <stop offset="0%" stop-color="#0f2027" />
-                    <stop offset="100%" stop-color="#2c5364" />
-                </linearGradient>
-            </defs>
+                <div class="ref-doc">
+                    <div class="ref-doc-ic">PDF</div>
+                    <div class="ref-doc-body">
+                        <p class="ref-doc-name">FuelEU Maritime FAQ (Rev. 2)</p>
+                        <div class="ref-doc-actions">
+                            <a class="ref-action view" href="files/FuelEU_faq_2_e.pdf" target="_blank"
+                                rel="noopener">Open</a>
+                            <a class="ref-action download" href="files/FuelEU_faq_2_e.pdf" download>Download</a>
+                        </div>
+                    </div>
+                </div>
 
-            <!-- Animated Smoke -->
-            <g>
-                <circle cx="58" cy="28" r="5" fill="url(#smokeGrad)" opacity="0.8">
-                    <animate attributeName="cy" values="28;18;28" dur="3s" repeatCount="indefinite" />
-                    <animate attributeName="opacity" values="0.8;0.2;0.8" dur="3s" repeatCount="indefinite" />
-                </circle>
+                <div class="ref-doc">
+                    <div class="ref-doc-ic">PDF</div>
+                    <div class="ref-doc-body">
+                        <p class="ref-doc-name">KR FuelEU Maritime Guidelines</p>
+                        <div class="ref-doc-actions">
+                            <a class="ref-action view" href="files/KR FuelEU Maritime Guidelines_Rev.2.pdf"
+                                target="_blank" rel="noopener">Open</a>
+                            <a class="ref-action download" href="files/KR FuelEU Maritime Guidelines_Rev.2.pdf"
+                                download>Download</a>
+                        </div>
+                    </div>
+                </div>
 
-                <circle cx="65" cy="24" r="4" fill="url(#smokeGrad)" opacity="0.6">
-                    <animate attributeName="cy" values="24;14;24" dur="3.5s" repeatCount="indefinite" />
-                    <animate attributeName="opacity" values="0.6;0.1;0.6" dur="3.5s" repeatCount="indefinite" />
-                </circle>
+                <div class="ref-doc">
+                    <div class="ref-doc-ic">PDF</div>
+                    <div class="ref-doc-body">
+                        <p class="ref-doc-name">FuelEU Calculation Methodologies</p>
+                        <div class="ref-doc-actions">
+                            <a class="ref-action view"
+                                href="files/calculation methodologies under the regulation (EU) 20231805 (FuelEU).pdf"
+                                target="_blank" rel="noopener">Open</a>
+                            <a class="ref-action download"
+                                href="files/calculation methodologies under the regulation (EU) 20231805 (FuelEU).pdf"
+                                download>Download</a>
+                        </div>
+                    </div>
+                </div>
 
-                <circle cx="70" cy="20" r="3" fill="url(#smokeGrad)" opacity="0.5">
-                    <animate attributeName="cy" values="20;10;20" dur="4s" repeatCount="indefinite" />
-                    <animate attributeName="opacity" values="0.5;0.1;0.5" dur="4s" repeatCount="indefinite" />
-                </circle>
-            </g>
+                <div class="ref-doc">
+                    <div class="ref-doc-ic">PDF</div>
+                    <div class="ref-doc-body">
+                        <p class="ref-doc-name">Official FuelEU Guidance Document</p>
+                        <div class="ref-doc-actions">
+                            <a class="ref-action view"
+                                href="files/cellar_078fb779-e577-11eb-a1a5-01aa75ed71a1.0001.02_DOC_2.pdf" target="_blank"
+                                rel="noopener">Open</a>
+                            <a class="ref-action download"
+                                href="files/cellar_078fb779-e577-11eb-a1a5-01aa75ed71a1.0001.02_DOC_2.pdf"
+                                download>Download</a>
+                        </div>
+                    </div>
+                </div>
 
-            <!-- Ship -->
-            <rect x="41" y="36" width="9" height="6" rx="1.5" fill="#ffffff" />
-            <rect x="52" y="32" width="4" height="10" rx="1" fill="#00d4ff" />
+                <div class="ref-doc">
+                    <div class="ref-doc-ic">PDF</div>
+                    <div class="ref-doc-body">
+                        <p class="ref-doc-name">FuelEU Guidance for Shipping Companies</p>
+                        <div class="ref-doc-actions">
+                            <a class="ref-action view" href="files/fueleu_guidance_document_for_shipping_companies.pdf"
+                                target="_blank" rel="noopener">Open</a>
+                            <a class="ref-action download" href="files/fueleu_guidance_document_for_shipping_companies.pdf"
+                                download>Download</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            <path d="M12 52h56l-6 10c-1.4 2.3-4 3.7-6.8 3.7H30.8c-2.8 0-5.3-1.4-6.8-3.7L18 52z" fill="url(#hull)"
-                stroke="#00d4ff" stroke-width="1.2" />
-
-            <!-- Windows -->
-            <circle cx="30" cy="55.5" r="1.6" fill="#a8ffea" />
-            <circle cx="36" cy="55.5" r="1.6" fill="#a8ffea" />
-            <circle cx="42" cy="55.5" r="1.6" fill="#a8ffea" />
-            <circle cx="48" cy="55.5" r="1.6" fill="#a8ffea" />
-            <circle cx="54" cy="55.5" r="1.6" fill="#a8ffea" />
-
-            <!-- Waves -->
-            <path d="M14 68c4.5 3.5 9 3.5 13.5 0 4.5 3.5 9 3.5 13.5 0 4.5 3.5 9 3.5 13.5 0 4.5 3.5 9 3.5 13.5 0"
-                fill="none" stroke="#00d4ff" stroke-width="2.2" stroke-linecap="round" />
-        </svg>
-
-        <div class="logo">Fuel<span>EU</span></div>
-        <h3>Pooling of Compliance</h3>
-
-        <button onclick="checkBalance()">Check Balance</button>
-
-        <div class="result" id="result"></div>
-
-        <div class="footer"></div>
+            <div class="ref-modal-foot">Use the close button, press Escape, or click outside the popup to close it.
+            </div>
+        </div>
     </div>
 
     <script>
-        function checkBalance() {
-            window.location.href = 'calculate.html';
-        }
-    </script>
+        function goCalc() { window.location.href = 'calculator.html' }
+        function goPool() { window.location.href = 'pooling.html' }
+        function openProfile() { window.open('https://www.linkedin.com/in/abhiroop-k-mrina-24735b170/?skipRedirect=true', '_blank') }
 
+        const referenceModal = document.getElementById('referenceModal');
+        function openReferenceModal() {
+            referenceModal.classList.add('show');
+            referenceModal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeReferenceModal() {
+            referenceModal.classList.remove('show');
+            referenceModal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+        referenceModal.addEventListener('click', function (e) {
+            if (e.target === referenceModal) closeReferenceModal();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && referenceModal.classList.contains('show')) closeReferenceModal();
+        });
+    </script>
 </body>
 
 </html>
