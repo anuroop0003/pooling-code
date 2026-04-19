@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CII Maritime Compliance Portal</title>
+    <style>
+        :root {
+            --ink: #0f2f3f;
+            --ink2: #07111f;
+            --blue: #1f5d7a;
+            --blue2: #2f7aa0;
+            --accent: #33d6ff;
+            --accent2: #70ffb8;
+            --muted: #5c7f93;
+            --line: rgba(255, 255, 255, .12);
+            --shadow: 0 30px 90px rgba(0, 0, 0, .45);
+            --font: 'Poppins', Inter, 'Segoe UI', Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            height: 100%
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background:
+                radial-gradient(circle at 14% 18%, rgba(51, 214, 255, .10), transparent 24%),
+                radial-gradient(circle at 84% 78%, rgba(112, 255, 184, .08), transparent 26%),
+                radial-gradient(circle at top, #15304b 0%, #07111f 45%, #030910 100%);
+            font-family: var(--font);
+            padding: 20px;
+        }
+
+        .portal {
+            max-width: 1240px;
+            width: 96%;
+            background: #fff;
+            border-radius: 26px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 360px 1fr 1fr;
+        }
+
+        @media (max-width:1120px) {
+            .portal {
+                grid-template-columns: 1fr
+            }
+        }
+
+        /* ===== ABOUT PANEL ===== */
+        .about-tool {
+            background: linear-gradient(180deg, #0f2f3f, #061823);
+            color: #eaf7ff;
+            padding: 36px 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            isolation: isolate;
+        }
+
+        .about-tool::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(51, 214, 255, .08), transparent 35%),
+                radial-gradient(circle at 85% 15%, rgba(112, 255, 184, .10), transparent 30%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .about-tool h3 {
+            margin: 0 0 14px;
+            font-size: 20px;
+            letter-spacing: .4px
+        }
+
+        .about-tool p {
+            font-size: 14px;
+            line-height: 1.65;
+            color: #cfe6f5;
+            margin: 0
+        }
+
+        .logo-box {
+            margin: 22px 0 26px;
+            text-align: center;
+            border-radius: 24px;
+            padding: 18px 12px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, .05), rgba(255, 255, 255, .02));
+            border: 1px solid rgba(255, 255, 255, .08);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 12px 28px rgba(0, 0, 0, .18);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 240px;
+        }
+
+        .logo-box svg {
+            width: 168px;
+            height: 168px;
+            filter: drop-shadow(0 0 20px rgba(0, 212, 255, .34))
+        }
+
+        .link-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, .25);
+            background: transparent;
+            color: #eaf7ff;
+            font-weight: 800;
+            cursor: pointer;
+            transition: .25s ease;
+        }
+
+        .link-btn:hover {
+            background: rgba(255, 255, 255, .12);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, .18)
+        }
+
+        .about-footer {
+            font-size: 11px;
+            color: #9fb7c8;
+            text-align: center
+        }
+
+        /* ===== CENTER BRAND ===== */
+        .brand {
+            background: linear-gradient(180deg, #f7fbff, #eef4f8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 42px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .intro-splash__logo {
+            margin-top: 32px;
+            max-width: 180px;
+            height: auto;
+            opacity: 0.9;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+            filter: drop-shadow(0 4px 12px rgba(15, 47, 63, 0.1));
+        }
+
+        .intro-splash__logo:hover {
+            transform: translateY(-5px) scale(1.05);
+            opacity: 1;
+        }
+
+        .brand::before {
+            content: "";
+            position: absolute;
+            width: 360px;
+            height: 360px;
+            right: -130px;
+            top: -140px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(51, 214, 255, .14), transparent 66%);
+        }
+
+        .brand::after {
+            content: "";
+            position: absolute;
+            width: 320px;
+            height: 320px;
+            left: -120px;
+            bottom: -140px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(112, 255, 184, .12), transparent 68%);
+        }
+
+        .brand-wrap {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 420px
+        }
+
+        .ship-logo-main {
+            position: relative;
+            width: 220px;
+            height: 120px;
+            margin: 0 auto 12px
+        }
+
+        .smokestack {
+            position: absolute;
+            top: 6px;
+            left: 98px;
+            width: 20px;
+            height: 34px;
+            background: #143a4c;
+            border-radius: 5px
+        }
+
+        .co2 {
+            position: absolute;
+            top: -8px;
+            left: 90px;
+            padding: 6px 12px;
+            background: #eef2f4;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            opacity: 0;
+            animation: co2 3.2s infinite
+        }
+
+        .co2.b2 {
+            left: 112px;
+            animation-delay: 1.2s
+        }
+
+        .co2.b3 {
+            left: 100px;
+            animation-delay: 2.4s
+        }
+
+        @keyframes co2 {
+            0% {
+                transform: translateY(0);
+                opacity: 0
+            }
+
+            20% {
+                opacity: .9
+            }
+
+            100% {
+                transform: translateY(-60px);
+                opacity: 0
+            }
+        }
+
+        .deck {
+            position: absolute;
+            bottom: 58px;
+            left: 62px;
+            width: 96px;
+            height: 34px;
+            background: #9fd0e6;
+            border-radius: 8px
+        }
+
+        .hull {
+            position: absolute;
+            bottom: 24px;
+            width: 220px;
+            height: 46px;
+            background: linear-gradient(180deg, #2f7aa0, #0f2f3f);
+            border-radius: 0 0 36px 36px
+        }
+
+        .waves {
+            height: 10px;
+            overflow: hidden;
+            margin: 8px auto 10px;
+            width: 180px;
+            border-radius: 999px;
+            background: rgba(31, 93, 122, .12);
+            box-shadow: inset 0 0 0 1px rgba(15, 47, 63, .08)
+        }
+
+        .waves span {
+            display: block;
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, rgba(51, 214, 255, .25) 0%, rgba(51, 214, 255, .95) 35%, rgba(51, 214, 255, .25) 70%);
+            background-size: 200% 100%;
+            animation: loadingSweep 1.4s linear infinite
+        }
+
+        @keyframes loadingSweep {
+            from {
+                background-position: 200% 0
+            }
+
+            to {
+                background-position: -200% 0
+            }
+        }
+
+        .brand h1 {
+            margin: 12px 0 4px;
+            color: #0f2f3f;
+            font-size: 34px;
+            line-height: 1.08;
+            letter-spacing: -.4px;
+            font-weight: 900;
+            white-space: nowrap
+        }
+
+        .brand h1 .cii {
+            color: var(--accent)
+        }
+
+        .brand p {
+            margin: 0;
+            color: #5c7f93;
+            font-size: 13px
+        }
+
+        /* ===== ACCESS ===== */
+        .access {
+            padding: 54px 46px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: linear-gradient(180deg, #ffffff, #fbfdff)
+        }
+
+        .access h2 {
+            margin: 0 0 10px;
+            color: #0f2f3f;
+            white-space: nowrap
+        }
+
+        .access p {
+            margin: 0 0 26px;
+            color: #5c7f93;
+            font-size: 14px
+        }
+
+        .card-btn {
+            position: relative;
+            display: block;
+            padding: 18px 18px 18px 20px;
+            border-radius: 18px;
+            border: 1px solid #dde7ef;
+            background: #f9fcff;
+            margin-bottom: 16px;
+            cursor: pointer;
+            text-align: left;
+            text-decoration: none;
+            transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease, color .28s ease;
+            overflow: hidden;
+            isolation: isolate
+        }
+
+        .card-btn::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            transform: scaleX(0);
+            transform-origin: left center;
+            transition: transform .38s ease;
+            z-index: -1
+        }
+
+        .card-btn::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 6px;
+            border-radius: 18px 0 0 18px;
+            opacity: .85;
+            transition: width .32s ease, opacity .32s ease;
+            z-index: 0
+        }
+
+        .card-btn>* {
+            position: relative;
+            z-index: 1
+        }
+
+        .card-btn h3 {
+            margin: 0 0 4px;
+            color: #1f5d7a;
+            transition: color .28s ease;
+            font-size: 20px
+        }
+
+        .card-btn span {
+            font-size: 13px;
+            color: #5c7f93;
+            transition: color .28s ease;
+            display: block;
+            line-height: 1.5
+        }
+
+        .card-btn.primary::before {
+            background: linear-gradient(90deg, #00B050 0%, #C5E0B4 25%, #FDF205 50%, #ED7D31 75%, #FF6666 100%)
+        }
+
+        .card-btn.primary::after {
+            background: linear-gradient(180deg, #00B050 0%, #C5E0B4 25%, #FDF205 50%, #ED7D31 75%, #FF6666 100%)
+        }
+
+        .card-btn.secondary::before {
+            background: linear-gradient(90deg, #1fb6ff 0%, #0d7ef7 45%, #70ffb8 100%)
+        }
+
+        .card-btn.secondary::after {
+            background: linear-gradient(180deg, #1fb6ff, #70ffb8)
+        }
+
+        .card-btn:hover,
+        .card-btn:focus-visible {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 34px rgba(13, 126, 247, .16), 0 6px 16px rgba(9, 42, 62, .08)
+        }
+
+        .card-btn.primary:hover,
+        .card-btn.primary:focus-visible {
+            border-color: rgba(237, 125, 49, .55)
+        }
+
+        .card-btn.secondary:hover,
+        .card-btn.secondary:focus-visible {
+            border-color: rgba(13, 126, 247, .45)
+        }
+
+        .card-btn:hover::before,
+        .card-btn:focus-visible::before {
+            transform: scaleX(1)
+        }
+
+        .card-btn:hover::after,
+        .card-btn:focus-visible::after {
+            width: 100%;
+            opacity: 0
+        }
+
+        .card-btn:hover h3,
+        .card-btn:hover span,
+        .card-btn:focus-visible h3,
+        .card-btn:focus-visible span {
+            color: #ffffff
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #7a8fa3
+        }
+
+        /* ===== REFERENCE DOCUMENT ===== */
+        .ref-row {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin: 0 0 14px;
+            gap: 10px
+        }
+
+        .ref-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid #dde7ef;
+            background: linear-gradient(180deg, #ffffff, #f6fbff);
+            color: #0f2f3f;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease
+        }
+
+        .ref-pill:hover,
+        .ref-pill:focus-visible {
+            transform: translateY(-2px);
+            border-color: rgba(51, 214, 255, .55);
+            box-shadow: 0 14px 26px rgba(15, 47, 63, .12), 0 6px 14px rgba(51, 214, 255, .15)
+        }
+
+        .ref-ic {
+            width: 18px;
+            height: 18px;
+            display: inline-block;
+            flex: 0 0 18px
+        }
+
+        .ref-sub {
+            font-weight: 600;
+            color: #5c7f93;
+            font-size: 12px
+        }
+
+        @media(max-width:1100px) {
+            .ref-row {
+                justify-content: flex-start
+            }
+        }
+
+        /* ===== REFERENCE MODAL ===== */
+        .ref-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 10, 18, .62);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 9999
+        }
+
+        .ref-modal.show {
+            display: flex
+        }
+
+        .ref-modal-card {
+            width: min(760px, 96vw);
+            max-height: 88vh;
+            overflow: auto;
+            background: linear-gradient(180deg, #ffffff, #f6fbff);
+            border: 1px solid rgba(31, 93, 122, .12);
+            border-radius: 26px;
+            box-shadow: 0 28px 80px rgba(0, 0, 0, .35);
+            position: relative;
+            padding: 26px
+        }
+
+        .ref-modal-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px
+        }
+
+        .ref-modal-title {
+            margin: 0;
+            color: #0f2f3f;
+            font-size: 24px;
+            line-height: 1.2
+        }
+
+        .ref-modal-sub {
+            margin: 6px 0 0;
+            color: #5c7f93;
+            font-size: 14px
+        }
+
+        .ref-close {
+            border: none;
+            background: #0f2f3f;
+            color: #fff;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1;
+            box-shadow: 0 8px 18px rgba(15, 47, 63, .18);
+            transition: .2s ease
+        }
+
+        .ref-close:hover {
+            transform: translateY(-1px);
+            background: #15445a
+        }
+
+        .ref-doc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px
+        }
+
+        @media(max-width:700px) {
+            .ref-doc-grid {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .ref-doc {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            padding: 16px;
+            border-radius: 18px;
+            border: 1px solid #dfe9f0;
+            background: #fff;
+            box-shadow: 0 10px 22px rgba(15, 47, 63, .06);
+            transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease
+        }
+
+        .ref-doc:hover {
+            transform: translateY(-2px);
+            border-color: rgba(51, 214, 255, .55);
+            box-shadow: 0 16px 28px rgba(15, 47, 63, .10), 0 6px 14px rgba(51, 214, 255, .10)
+        }
+
+        .ref-doc-ic {
+            flex: 0 0 48px;
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(180deg, #eaf7ff, #d7f0ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1f5d7a;
+            font-weight: 800;
+            font-size: 13px;
+            border: 1px solid #cfe7f5
+        }
+
+        .ref-doc-body {
+            min-width: 0;
+            flex: 1
+        }
+
+        .ref-doc-name {
+            margin: 0 0 8px;
+            color: #0f2f3f;
+            font-size: 14px;
+            line-height: 1.45;
+            font-weight: 700;
+            word-break: break-word
+        }
+
+        .ref-doc-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        .ref-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 9px 12px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 700;
+            transition: .2s ease;
+            border: 1px solid transparent
+        }
+
+        .ref-action.view {
+            background: #edf8ff;
+            color: #1f5d7a;
+            border-color: #cfe7f5
+        }
+
+        .ref-action.view:hover {
+            background: #dff3ff
+        }
+
+        .ref-action.download {
+            background: linear-gradient(90deg, #16d6c0, #33d6ff);
+            color: #ffffff
+        }
+
+        .ref-action.download:hover {
+            filter: brightness(.98);
+            transform: translateY(-1px)
+        }
+
+        .ref-modal-foot {
+            margin-top: 16px;
+            color: #7a8fa3;
+            font-size: 12px;
+            text-align: center
+        }
+
+        @media (max-width:1120px) {
+
+            .about-tool,
+            .brand,
+            .access {
+                padding: 34px 26px
+            }
+        }
+
+        @media (max-width:640px) {
+            body {
+                padding: 14px
+            }
+
+            .portal {
+                width: 100%;
+                border-radius: 22px
+            }
+
+            .brand h1 {
+                font-size: 30px
+            }
+
+            .card-btn h3 {
+                font-size: 18px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="portal">
+        <div class="about-tool">
+            <div>
+                <h3>About This Tool</h3>
+                <p>CII Maritime Calculator is designed to support vessel performance review with a clear, professional
+                    interface for Carbon Intensity Indicator rating checks and related biofuel conversion factor
+                    reference.</p>
+                <div class="logo-box">
+                    <svg viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg"
+                        aria-label="CII Animated Logo with Speedometer" style="overflow:visible;">
+                        <defs>
+                            <linearGradient id="waterGradA" x1="0" x2="1">
+                                <stop offset="0%" stop-color="#00d4ff" />
+                                <stop offset="100%" stop-color="#0077ff" />
+                            </linearGradient>
+                            <linearGradient id="shipGradA" x1="0" x2="1">
+                                <stop offset="0%" stop-color="#0f2027" />
+                                <stop offset="100%" stop-color="#2c5364" />
+                            </linearGradient>
+                            <radialGradient id="co2GradA">
+                                <stop offset="0%" stop-color="#a8ffea" />
+                                <stop offset="100%" stop-color="#00d4ff" />
+                            </radialGradient>
+                            <linearGradient id="gA1" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#00B050" />
+                                <stop offset="100%" stop-color="#00B050" />
+                            </linearGradient>
+                            <linearGradient id="gB1" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#C5E0B4" />
+                                <stop offset="100%" stop-color="#C5E0B4" />
+                            </linearGradient>
+                            <linearGradient id="gC1" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#FDF205" />
+                                <stop offset="100%" stop-color="#FDF205" />
+                            </linearGradient>
+                            <linearGradient id="gD1" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#ED7D31" />
+                                <stop offset="100%" stop-color="#ED7D31" />
+                            </linearGradient>
+                            <linearGradient id="gE1" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#FF6666" />
+                                <stop offset="100%" stop-color="#FF6666" />
+                            </linearGradient>
+                        </defs>
+                        <path d="M34 66 A56 56 0 0 1 146 66" fill="none" stroke="rgba(255,255,255,.12)"
+                            stroke-width="13" stroke-linecap="round" />
+                        <path d="M34 66 A56 56 0 0 1 52 26" fill="none" stroke="url(#gA1)" stroke-width="13"
+                            stroke-linecap="round" />
+                        <path d="M52 26 A56 56 0 0 1 82 12" fill="none" stroke="url(#gB1)" stroke-width="13"
+                            stroke-linecap="round" />
+                        <path d="M82 12 A56 56 0 0 1 112 15" fill="none" stroke="url(#gC1)" stroke-width="13"
+                            stroke-linecap="round" />
+                        <path d="M112 15 A56 56 0 0 1 136 34" fill="none" stroke="url(#gD1)" stroke-width="13"
+                            stroke-linecap="round" />
+                        <path d="M136 34 A56 56 0 0 1 146 66" fill="none" stroke="url(#gE1)" stroke-width="13"
+                            stroke-linecap="round" />
+                        <text x="18" y="72" font-size="12" font-weight="900" fill="#00B050">A</text>
+                        <text x="44" y="18" font-size="12" font-weight="900" fill="#C5E0B4">B</text>
+                        <text x="84" y="4" font-size="12" font-weight="900" fill="#FDF205">C</text>
+                        <text x="132" y="18" font-size="12" font-weight="900" fill="#ED7D31">D</text>
+                        <text x="154" y="48" font-size="12" font-weight="900" fill="#FF6666">E</text>
+                        <g>
+                            <circle cx="90" cy="66" r="15" fill="#C5E0B4" fill-opacity="0.32" />
+                            <g>
+                                <animateTransform attributeName="transform" type="rotate"
+                                    values="-80 90 66;80 90 66;-80 90 66" dur="4.8s" repeatCount="indefinite" />
+                                <line x1="90" y1="66" x2="90" y2="19" stroke="#ffffff" stroke-width="3.2"
+                                    stroke-linecap="round" />
+                                <circle cx="90" cy="66" r="6.8" fill="#FDF205" />
+                            </g>
+                        </g>
+                        <path d="M20 134 Q34 124 48 134 T76 134 T104 134 T132 134 T160 134" fill="none"
+                            stroke="url(#waterGradA)" stroke-width="3.2">
+                            <animate attributeName="d" dur="3s" repeatCount="indefinite"
+                                values="M20 134 Q34 124 48 134 T76 134 T104 134 T132 134 T160 134; M20 134 Q34 144 48 134 T76 134 T104 134 T132 134 T160 134; M20 134 Q34 124 48 134 T76 134 T104 134 T132 134 T160 134" />
+                        </path>
+                        <path d="M12 144 Q26 136 40 144 T68 144 T96 144 T124 144 T152 144" fill="none" stroke="#70ffb8"
+                            stroke-opacity="0.6" stroke-width="2.4">
+                            <animate attributeName="d" dur="3.6s" repeatCount="indefinite"
+                                values="M12 144 Q26 136 40 144 T68 144 T96 144 T124 144 T152 144; M12 144 Q26 152 40 144 T68 144 T96 144 T124 144 T152 144; M12 144 Q26 136 40 144 T68 144 T96 144 T124 144 T152 144" />
+                        </path>
+                        <g>
+                            <animateTransform attributeName="transform" type="rotate"
+                                values="-2 90 114;2 90 114;-2 90 114" dur="4s" repeatCount="indefinite" />
+                            <path d="M42 108 H126 L112 126 H54 Z" fill="url(#shipGradA)" stroke="#00d4ff"
+                                stroke-width="1.5" />
+                            <rect x="72" y="91" width="24" height="13" rx="2" fill="#ffffff" />
+                            <rect x="95" y="84" width="8" height="20" rx="2" fill="#00d4ff" />
+                            <circle cx="62" cy="116" r="2.2" fill="#a8ffea" />
+                            <circle cx="74" cy="116" r="2.2" fill="#a8ffea" />
+                            <circle cx="86" cy="116" r="2.2" fill="#a8ffea" />
+                            <circle cx="98" cy="116" r="2.2" fill="#a8ffea" />
+                        </g>
+                        <g>
+                            <circle cx="104" cy="84" r="4" fill="url(#co2GradA)">
+                                <animate attributeName="cy" values="84;58;84" dur="3s" repeatCount="indefinite" />
+                                <animate attributeName="opacity" values="0.8;0.1;0.8" dur="3s"
+                                    repeatCount="indefinite" />
+                            </circle>
+                            <circle cx="112" cy="78" r="3">
+                                <animate attributeName="cy" values="78;50;78" dur="3.5s" repeatCount="indefinite" />
+                                <animate attributeName="opacity" values="0.6;0.1;0.6" dur="3.5s"
+                                    repeatCount="indefinite" />
+                                <animate attributeName="fill" values="#a8ffea;#00d4ff;#a8ffea" dur="3.5s"
+                                    repeatCount="indefinite" />
+                            </circle>
+                            <circle cx="120" cy="72" r="2.5">
+                                <animate attributeName="cy" values="72;44;72" dur="4s" repeatCount="indefinite" />
+                                <animate attributeName="opacity" values="0.5;0.1;0.5" dur="4s"
+                                    repeatCount="indefinite" />
+                                <animate attributeName="fill" values="#a8ffea;#00d4ff;#a8ffea" dur="4s"
+                                    repeatCount="indefinite" />
+                            </circle>
+                        </g>
+                    </svg>
+                </div>
+                <button class="link-btn" onclick="openProfile()">View LinkedIn Profile</button>
+            </div>
+            <div class="about-footer">CII Maritime Rating Portal</div>
+        </div>
+
+        <div class="brand">
+            <div class="brand-wrap">
+                <div class="ship-logo-main">
+                    <div class="smokestack"></div>
+                    <div class="co2">CO₂</div>
+                    <div class="co2 b2">CO₂</div>
+                    <div class="co2 b3">CO₂</div>
+                    <div class="deck"></div>
+                    <div class="hull"></div>
+                </div>
+                <div class="waves"><span></span></div>
+                <h1><span class="cii">CII</span><br>Maritime Calculator</h1>
+                <p>Carbon Intensity Indicator Rating Portal</p>
+            </div>
+            <a href="index.html">
+                <img class="intro-splash__logo" src="./files/logo.png" alt="NavCIIFuel logo splash screen" />
+            </a>
+        </div>
+
+        <div class="access">
+            <div class="ref-row">
+                <button class="ref-pill" type="button" onclick="openReferenceModal()"
+                    aria-label="Open reference documents">
+                    <svg class="ref-ic" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true">
+                        <path d="M7 3h7l3 3v15a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" stroke="#1f5d7a"
+                            stroke-width="1.6" />
+                        <path d="M14 3v4a2 2 0 0 0 2 2h4" stroke="#33d6ff" stroke-width="1.6" />
+                        <path d="M8 12h8M8 16h8" stroke="#0f2f3f" stroke-width="1.6" stroke-linecap="round" />
+                    </svg>
+                    <span>Reference Document</span>
+                </button>
+            </div>
+            <h2>Choose calculation module</h2>
+            <p>Select the tool you want to use</p>
+            <a class="card-btn primary" href="final_cii_calculator_other_cf_manual_fix.html">
+                <h3>Check your vessel CII rating</h3>
+                <span>Open the CII calculator to review vessel carbon intensity performance and rating output.</span>
+            </a>
+            <a class="card-btn secondary" href="CF_905_CII_ABC_Design_v16_pdf_partA_title_905_removed.html">
+                <h3>Check the C<sub>F</sub> of the biofuel</h3>
+                <span>Open the biofuel conversion factor reference page for fuel-specific C<sub>F</sub> checking.</span>
+            </a>
+            <div class="footer">CII Maritime Rating Portal</div>
+        </div>
+    </div>
+
+    <!-- Reference Documents Modal -->
+    <div class="ref-modal" id="referenceModal" aria-hidden="true" role="dialog" aria-labelledby="referenceModalTitle">
+        <div class="ref-modal-card" role="document">
+            <div class="ref-modal-head">
+                <div>
+                    <h3 class="ref-modal-title" id="referenceModalTitle">Reference Documents</h3>
+                    <p class="ref-modal-sub">Click any PDF to view or download it directly.</p>
+                </div>
+                <button class="ref-close" type="button" onclick="closeReferenceModal()"
+                    aria-label="Close popup">×</button>
+            </div>
+
+            <div class="ref-doc-grid">
+                <div class="ref-doc">
+                    <div class="ref-doc-ic">PDF</div>
+                    <div class="ref-doc-body">
+                        <p class="ref-doc-name">IACS Rec. 175 - CII Implementation</p>
+                        <div class="ref-doc-actions">
+                            <a class="ref-action view" href="files/cii-reference/IACS rec175.pdf" target="_blank"
+                                rel="noopener">Open</a>
+                            <a class="ref-action download" href="files/cii-reference/IACS rec175.pdf"
+                                download>Download</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ref-doc">
+                    <div class="ref-doc-ic">PDF</div>
+                    <div class="ref-doc-body">
+                        <p class="ref-doc-name">MEPC.338(76) - CII Reduction Factors (G3)</p>
+                        <div class="ref-doc-actions">
+                            <a class="ref-action view"
+                                href="files/cii-reference/MEPC.338(76) 2021 Guidelines on the operational carbon intensity reduction factors relative to reference lines G3.pdf"
+                                target="_blank" rel="noopener">Open</a>
+                            <a class="ref-action download"
+                                href="files/cii-reference/MEPC.338(76) 2021 Guidelines on the operational carbon intensity reduction factors relative to reference lines G3.pdf"
+                                download>Download</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ref-doc">
+                    <div class="ref-doc-ic">PDF</div>
+                    <div class="ref-doc-body">
+                        <p class="ref-doc-name">MEPC.352(78) - Operational CII Guidelines (G1)</p>
+                        <div class="ref-doc-actions">
+                            <a class="ref-action view"
+                                href="files/cii-reference/MEPC.352(78) 2022 Guidelines on Operational CII G1.pdf"
+                                target="_blank" rel="noopener">Open</a>
+                            <a class="ref-action download"
+                                href="files/cii-reference/MEPC.352(78) 2022 Guidelines on Operational CII G1.pdf"
+                                download>Download</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ref-doc">
+                    <div class="ref-doc-ic">PDF</div>
+                    <div class="ref-doc-body">
+                        <p class="ref-doc-name">MEPC.353(78) - CII Reference Lines (G2)</p>
+                        <div class="ref-doc-actions">
+                            <a class="ref-action view"
+                                href="files/cii-reference/MEPC.353(78) 2022 Guidelines on CII Ref Lines G2.pdf"
+                                target="_blank" rel="noopener">Open</a>
+                            <a class="ref-action download"
+                                href="files/cii-reference/MEPC.353(78) 2022 Guidelines on CII Ref Lines G2.pdf"
+                                download>Download</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ref-doc">
+                    <div class="ref-doc-ic">PDF</div>
+                    <div class="ref-doc-body">
+                        <p class="ref-doc-name">MEPC.354(78) - CII Rating Guidelines (G4)</p>
+                        <div class="ref-doc-actions">
+                            <a class="ref-action view"
+                                href="files/cii-reference/MEPC.354(78) 2022 CII Rating Guidelines G4.pdf"
+                                target="_blank" rel="noopener">Open</a>
+                            <a class="ref-action download"
+                                href="files/cii-reference/MEPC.354(78) 2022 CII Rating Guidelines G4.pdf"
+                                download>Download</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ref-doc">
+                    <div class="ref-doc-ic">PDF</div>
+                    <div class="ref-doc-body">
+                        <p class="ref-doc-name">MEPC.355(78) - CII Correction Factors (G5)</p>
+                        <div class="ref-doc-actions">
+                            <a class="ref-action view"
+                                href="files/cii-reference/MEPC.355(78) 2022 Interim CII Correction factors Voyage Adjustments G5.pdf"
+                                target="_blank" rel="noopener">Open</a>
+                            <a class="ref-action download"
+                                href="files/cii-reference/MEPC.355(78) 2022 Interim CII Correction factors Voyage Adjustments G5.pdf"
+                                download>Download</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ref-modal-foot">Use the close button, press Escape, or click outside the popup to close it.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openProfile() { window.open('https://www.linkedin.com/in/abhiroop-k-mrina-24735b170/?skipRedirect=true', '_blank') }
+        const referenceModal = document.getElementById('referenceModal');
+        function openReferenceModal() {
+            referenceModal.classList.add('show');
+            referenceModal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeReferenceModal() {
+            referenceModal.classList.remove('show');
+            referenceModal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+        referenceModal.addEventListener('click', function (e) {
+            if (e.target === referenceModal) closeReferenceModal();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && referenceModal.classList.contains('show')) closeReferenceModal();
+        });
+    </script>
+</body>
+
+</html>
